@@ -201,10 +201,10 @@ const HeroSection = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#8D153A' }}>
-              {isSinhala ? 'මිලදී ඇංගිත' : 'Pricing'}
+              {isSinhala ? 'මිලදී ඇංගිත' : isTamil ? 'விலை நிர்ணயம்' : 'Pricing'}
             </h2>
             <p className="text-lg text-muted-foreground">
-              {isSinhala ? 'ශ්‍රේණි අනුව මිල' : 'Affordable pricing by grade'}
+              {isSinhala ? 'ශ්‍රේණි අනුව මිල' : isTamil ? 'வகுப்பின்படி மலிவு விலை' : 'Affordable pricing by grade'}
             </p>
           </div>
           
@@ -221,13 +221,13 @@ const HeroSection = () => {
               >
                 <div className="text-center">
                   <p className="text-sm font-medium mb-2" style={{ color: '#667085' }}>
-                    {isSinhala ? `ශ්‍රේණි ${plan.grade}` : `Grade ${plan.grade}`}
+                    {isSinhala ? `ශ්‍රේණි ${plan.grade}` : isTamil ? `வகுப்பு ${plan.grade}` : `Grade ${plan.grade}`}
                   </p>
                   <p className="text-4xl font-bold mb-4" style={{ color: '#8D153A' }}>
                     {plan.price}
                   </p>
                   <p className="text-sm text-muted-foreground mb-6">
-                    {isSinhala ? 'මාසයකට' : 'per month'}
+                    {isSinhala ? 'මාසයකට' : isTamil ? 'மாதத்திற்கு' : 'per month'}
                   </p>
                   <button
                     className="w-full py-2 rounded-md text-sm font-medium"

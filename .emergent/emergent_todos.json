@@ -1,0 +1,42 @@
+[
+  {
+    "content": "Phase 1: Restore & Verify Core - Database seeded successfully",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 1: Restore & Verify Core - Backend configured and running",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 1: Restore & Verify Core - Frontend dependencies installed",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 1: Test core workflows with Testing Agent",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement Paper 2 Photo Upload (backend + frontend)",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Build Teacher Marking Interface",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Add Blood Report Visualization Enhancements",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement Sinhala Language UI Integration",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Design and implement Hero Section",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: End to End Testing using Testing Agent",
+    "status": "pending"
+  }
+]

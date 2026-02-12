@@ -614,6 +614,22 @@ async def get_paper2_submission(
     return {"status": "submitted", "submission": serialize_doc(submission)}
 
 
+@api_router.get("/uploads/{student_id}/{exam_id}/{filename}")
+async def serve_uploaded_file(
+    student_id: str,
+    exam_id: str,
+    filename: str,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Serve uploaded Paper 2 files"""
+    file_path = FILE_UPLOAD_DIR / student_id / exam_id / filename
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return FileResponse(file_path)
+
+
 # ============ Teacher Routes ============
 
 @api_router.get("/teacher/paper2/submissions")

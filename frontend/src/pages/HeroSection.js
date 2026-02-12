@@ -8,28 +8,28 @@ import LanguageToggle from '../components/LanguageToggle';
 const HeroSection = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const isS inhala = i18n.language === 'si';
+  const isSinhala = i18n.language === 'si';
 
   const benefits = [
     {
       icon: BookOpen,
-      title: isS inhala ? 'සමුල්ල විභාග පද්ධතිය' : 'Comprehensive Exam System',
-      description: isS inhala ? 'ශ්‍රේණි 2-5 සඳහා MCQ සහ ලියන විභාග' : 'Paper 1 MCQ & Paper 2 written exams for Grades 2-5',
+      title: isSinhala ? 'සමුල්ල විභාග පද්ධතිය' : 'Comprehensive Exam System',
+      description: isSinhala ? 'ශ්‍රේණි 2-5 සඳහා MCQ සහ ලියන විභාග' : 'Paper 1 MCQ & Paper 2 written exams for Grades 2-5',
     },
     {
       icon: Award,
-      title: isS inhala ? 'ලඛු වාර්තාකරණ' : 'Instant Results',
-      description: isS inhala ? 'ස්වයංක්‍රිය ලකුණු කිරීම සහ 10 කුසලතා විශ්ලේෂණය' : 'Auto-grading with 10-skill performance analysis',
+      title: isSinhala ? 'ලඛු වාර්තාකරණ' : 'Instant Results',
+      description: isSinhala ? 'ස්වයංක්‍රිය ලකුණු කිරීම සහ 10 කුසලතා විශ්ලේෂණය' : 'Auto-grading with 10-skill performance analysis',
     },
     {
       icon: Users,
-      title: isS inhala ? 'බහු විද්‍යාල හැකිලි' : 'Multi-role Access',
-      description: isS inhala ? 'ශිෂ්‍යයන්, මාපියන්, ගුරුවරුන් සහ ප්‍රභානියන්' : 'Dashboards for Students, Parents, Teachers & Admins',
+      title: isSinhala ? 'බහු විද්‍යාල හැකිලි' : 'Multi-role Access',
+      description: isSinhala ? 'ශිෂ්‍යයන්, මාපියන්, ගුරුවරුන් සහ ප්‍රභානියන්' : 'Dashboards for Students, Parents, Teachers & Admins',
     },
     {
       icon: TrendingUp,
-      title: isS inhala ? 'ප්‍රගති පිළිබංදීම' : 'Progress Tracking',
-      description: isS inhala ? 'විස්තරවත් කුසලතා පූරණ සහ මාසික වාර්තා' : 'Detailed skill breakdown and monthly reports',
+      title: isSinhala ? 'ප්‍රගති පිළිබංදීම' : 'Progress Tracking',
+      description: isSinhala ? 'විස්තරවත් කුසලතා පූරණ සහ මාසික වාර්තා' : 'Detailed skill breakdown and monthly reports',
     },
   ];
 
@@ -48,10 +48,10 @@ const HeroSection = () => {
               <span className="text-2xl">🇱🇰</span>
               <div>
                 <h1 className="text-lg font-bold" style={{ color: '#8D153A' }}>
-                  {isS inhala ? 'පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව' : 'Examination Evaluation Bureau'}
+                  {isSinhala ? 'පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව' : 'Examination Evaluation Bureau'}
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  {isS inhala ? 'ඉංග්‍රීසියන් ඇසුරුවදින්' : 'Building the Nation\'s New Generation'}
+                  {isSinhala ? 'ඉංග්‍රීසියන් ඇසුරුවදින්' : 'Building the Nation\'s New Generation'}
                 </p>
               </div>
             </div>
@@ -82,11 +82,11 @@ const HeroSection = () => {
                 className="inline-block px-4 py-2 rounded-full text-sm font-medium"
                 style={{ backgroundColor: '#FFF3D6', color: '#8D153A' }}
               >
-                {isS inhala ? 'ශිෂ්‍යත්ව විභාග 2026' : 'Scholarship Exams 2026'}
+                {isSinhala ? 'ශිෂ්‍යත්ව විභාග 2026' : 'Scholarship Exams 2026'}
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                {isS inhala && (
+                {isSinhala && (
                   <span className="font-sinhala block mb-2" style={{ color: '#8D153A', lineHeight: 1.75 }}>
                     ශ්‍රී ලංකා ශිෂ්‍යත්ව විභාග
                   </span>
@@ -95,12 +95,12 @@ const HeroSection = () => {
                   Sri Lanka Scholarship Exams
                 </span>
                 <span className="block mt-2" style={{ color: '#E68100' }}>
-                  {isS inhala ? 'ඇගයීම පොර්ටලය' : 'Evaluation Portal'}
+                  {isSinhala ? 'ඇගයීම පොර්ටලය' : 'Evaluation Portal'}
                 </span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground">
-                {isS inhala
+                {isSinhala
                   ? 'ශ්‍රේණි 2-5 ශිෂ්‍යයන් සඳහා සමුල්ල විභාග පද්ධතියක් සහ ලඛු ප්‍රගති පිළිබංදීමක්'
                   : 'Comprehensive exam system with instant results and progress tracking for Grades 2-5 students'}
               </p>
@@ -147,10 +147,10 @@ const HeroSection = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#8D153A' }}>
-              {isS inhala ? 'මුඛ්‍ය ඇංගිත' : 'Key Features'}
+              {isSinhala ? 'මුඛ්‍ය ඇංගිත' : 'Key Features'}
             </h2>
             <p className="text-lg text-muted-foreground">
-              {isS inhala
+              {isSinhala
                 ? 'ඔබගේ ශිෂ්‍යයාගේ සාර්ථකතාවය සඳහා ඇස දේ'
                 : 'Everything you need for successful exam preparation'}
             </p>
@@ -191,10 +191,10 @@ const HeroSection = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#8D153A' }}>
-              {isS inhala ? 'මිලදී ඇංගිත' : 'Pricing'}
+              {isSinhala ? 'මිලදී ඇංගිත' : 'Pricing'}
             </h2>
             <p className="text-lg text-muted-foreground">
-              {isS inhala ? 'ශ්‍රේණි අනුව මිල' : 'Affordable pricing by grade'}
+              {isSinhala ? 'ශ්‍රේණි අනුව මිල' : 'Affordable pricing by grade'}
             </p>
           </div>
           
@@ -211,13 +211,13 @@ const HeroSection = () => {
               >
                 <div className="text-center">
                   <p className="text-sm font-medium mb-2" style={{ color: '#667085' }}>
-                    {isS inhala ? `ශ්‍රේණි ${plan.grade}` : `Grade ${plan.grade}`}
+                    {isSinhala ? `ශ්‍රේණි ${plan.grade}` : `Grade ${plan.grade}`}
                   </p>
                   <p className="text-4xl font-bold mb-4" style={{ color: '#8D153A' }}>
                     {plan.price}
                   </p>
                   <p className="text-sm text-muted-foreground mb-6">
-                    {isS inhala ? 'මාසයකට' : 'per month'}
+                    {isSinhala ? 'මාසයකට' : 'per month'}
                   </p>
                   <button
                     className="w-full py-2 rounded-md text-sm font-medium"
@@ -239,7 +239,7 @@ const HeroSection = () => {
               style={{ backgroundColor: '#E8F5E9', color: '#137B10' }}
             >
               <span>💳</span>
-              <span>{isS inhala ? 'LankaQR හා විවිධ යැතී පද්ධති සහාය' : 'LankaQR and multiple payment methods accepted'}</span>
+              <span>{isSinhala ? 'LankaQR හා විවිධ යැතී පද්ධති සහාය' : 'LankaQR and multiple payment methods accepted'}</span>
             </div>
           </div>
         </div>
@@ -250,7 +250,7 @@ const HeroSection = () => {
         <div className="container mx-auto px-4">
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              {isS inhala
+              {isSinhala
                 ? 'ස්‍රී ලංකා පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව'
                 : 'Sri Lanka Examination Evaluation Bureau'}
             </p>

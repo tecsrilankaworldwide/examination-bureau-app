@@ -22,7 +22,7 @@ const LanguageToggle = () => {
         data-testid="language-toggle"
       >
         <Globe className="h-4 w-4 mr-2" />
-        {i18n.language === 'si' ? 'සිං' : 'EN'}
+        {i18n.language === 'si' ? 'සිං' : i18n.language === 'ta' ? 'த' : 'EN'}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
@@ -30,7 +30,14 @@ const LanguageToggle = () => {
           data-testid="language-option-si"
           className="cursor-pointer"
         >
-          සිංහල
+          සිංහල (Sinhala)
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => changeLanguage('ta')}
+          data-testid="language-option-ta"
+          className="cursor-pointer"
+        >
+          தமிழ் (Tamil)
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => changeLanguage('en')}

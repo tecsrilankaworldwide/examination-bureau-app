@@ -9,6 +9,7 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isSinhala = i18n.language === 'si';
+  const isTamil = i18n.language === 'ta';
 
   const benefits = [
     {
@@ -82,7 +83,7 @@ const HeroSection = () => {
                 className="inline-block px-4 py-2 rounded-full text-sm font-medium"
                 style={{ backgroundColor: '#FFF3D6', color: '#8D153A' }}
               >
-                {isSinhala ? 'ශිෂ්‍යත්ව විභාග 2026' : 'Scholarship Exams 2026'}
+                {isSinhala ? 'ශිෂ්‍යත්ව විභාග 2026' : isTamil ? 'புலமைப்பரிசில் தேர்வுகள் 2026' : 'Scholarship Exams 2026'}
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">

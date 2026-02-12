@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
+import './i18n'; // Initialize i18n
 import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import ExamInterface from './pages/ExamInterface';
@@ -9,6 +10,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ProgressReport from './pages/ProgressReport';
 import Paper2Submission from './pages/Paper2Submission';
+import HeroSection from './pages/HeroSection';
 import './App.css';
 
 const PrivateRoute = ({ children, allowedRoles }) => {
@@ -60,6 +62,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/hero" element={<HeroSection />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="/"

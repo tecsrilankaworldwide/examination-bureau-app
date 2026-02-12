@@ -75,8 +75,8 @@ const StudentDashboard = () => {
         <div className="container">
           <div className="header-content">
             <div>
-              <h1 className="header-title" data-testid="dashboard-title">🎓 Student Dashboard</h1>
-              <p className="header-subtitle">Grade {user.grade} • {user.name}</p>
+              <h1 className="header-title" data-testid="dashboard-title">📚 {t('dashboard')}</h1>
+              <p className="header-subtitle">🌟 {t('welcome')}, {user.name}!</p>
             </div>
             <div className="header-actions">
               <button

@@ -14,6 +14,7 @@ const resources = {
       // Dashboard
       'welcome': 'Welcome',
       'dashboard': 'Dashboard',
+      'management_board': 'Management Board',
       'my_exams': 'My Exams',
       'progress_report': 'Progress Report',
       'view_progress': 'View Progress',
@@ -80,7 +81,8 @@ const resources = {
       
       // Dashboard
       'welcome': 'සාදරයෙන් පිළිගනිමු',
-      'dashboard': 'උපකරණ පුවරුව',
+      'dashboard': 'කළමනාකරණ පුවරුව',
+      'management_board': 'කළමනාකරණ පුවරුව',
       'my_exams': 'මගේ විභාග',
       'progress_report': 'ප්‍රගති වාර්තාව',
       'view_progress': 'ප්‍රගතිය බලන්න',
@@ -147,7 +149,8 @@ const resources = {
       
       // Dashboard
       'welcome': 'வரவேற்பு',
-      'dashboard': 'கட்டுப்பாட்டு பலகை',
+      'dashboard': 'மேலாண்மை பலகை',
+      'management_board': 'மேலாண்மை பலகை',
       'my_exams': 'எனது தேர்வுகள்',
       'progress_report': 'முன்னேற்ற அறிக்கை',
       'view_progress': 'முன்னேற்றத்தைக் காண்க',

@@ -177,16 +177,28 @@ const StudentDashboard = () => {
                               Score: {attemptStatus.percentage}%
                             </div>
                           </div>
-                          <button
-                            className="btn btn-outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              alert('Results detail view coming soon!');
-                            }}
-                            data-testid={`view-results-${exam.id}`}
-                          >
-                            View Details
-                          </button>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <button
+                              className="btn btn-outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                alert('Results detail view coming soon!');
+                              }}
+                              data-testid={`view-results-${exam.id}`}
+                            >
+                              View Details
+                            </button>
+                            <button
+                              className="btn btn-primary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/paper2/${exam.id}`);
+                              }}
+                              data-testid={`submit-paper2-${exam.id}`}
+                            >
+                              📸 Submit Paper 2
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="exam-card-footer">

@@ -155,11 +155,13 @@ const HeroSection = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#8D153A' }}>
-              {isSinhala ? 'මුඛ්‍ය ඇංගිත' : 'Key Features'}
+              {isSinhala ? 'මුඛ්‍ය ඇංගිත' : isTamil ? 'முக்கிய அம்சங்கள்' : 'Key Features'}
             </h2>
             <p className="text-lg text-muted-foreground">
               {isSinhala
                 ? 'ඔබගේ ශිෂ්‍යයාගේ සාර්ථකතාවය සඳහා ඇස දේ'
+                : isTamil
+                ? 'வெற்றிகரமான தேர்வு தயாரிப்புக்கு தேவையான அனைத்தும்'
                 : 'Everything you need for successful exam preparation'}
             </p>
           </div>

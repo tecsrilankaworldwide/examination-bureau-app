@@ -251,6 +251,7 @@ class ExamBureauAPITester:
             
             if response.status_code == 200:
                 submissions = response.json()
+                self.submissions = submissions  # Store for later tests
                 return self.log_result(
                     "Teacher Submissions",
                     True,
@@ -260,6 +261,97 @@ class ExamBureauAPITester:
                 return self.log_result("Teacher Submissions", False, f"Status: {response.status_code}")
         except Exception as e:
             return self.log_result("Teacher Submissions", False, f"Error: {str(e)}")
+
+    def test_teacher_submissions_filter_grade(self):
+        """Test teacher submissions filter by grade"""
+        print("\n🔍 Testing Teacher Submissions Filter (Grade)...")
+        try:
+            if "Teacher" not in self.tokens:
+                return self.log_result("Teacher Submissions Filter (Grade)", False, "No teacher token available")
+            
+            headers = {"Authorization": f"Bearer {self.tokens['Teacher']}"}
+            response = requests.get(
+                f"{self.base_url}/api/teacher/paper2/submissions?grade=4",
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                submissions = response.json()
+                return self.log_result(
+                    "Teacher Submissions Filter (Grade)",
+                    True,
+                    f"Found {len(submissions)} Grade 4 submissions"
+                )
+            else:
+                return self.log_result("Teacher Submissions Filter (Grade)", False, f"Status: {response.status_code}")
+        except Exception as e:
+            return self.log_result("Teacher Submissions Filter (Grade)", False, f"Error: {str(e)}")
+
+    def test_teacher_submissions_filter_status(self):
+        """Test teacher submissions filter by status"""
+        print("\n🔍 Testing Teacher Submissions Filter (Status)...")
+        try:
+            if "Teacher" not in self.tokens:
+                return self.log_result("Teacher Submissions Filter (Status)", False, "No teacher token available")
+            
+            headers = {"Authorization": f"Bearer {self.tokens['Teacher']}"}
+            response = requests.get(
+                f"{self.base_url}/api/teacher/paper2/submissions?status=submitted",
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                submissions = response.json()
+                return self.log_result(
+                    "Teacher Submissions Filter (Status)",
+                    True,
+                    f"Found {len(submissions)} submitted submissions"
+                )
+            else:
+                return self.log_result("Teacher Submissions Filter (Status)", False, f"Status: {response.status_code}")
+        except Exception as e:
+            return self.log_result("Teacher Submissions Filter (Status)", False, f"Error: {str(e)}")
+
+    def test_get_paper2_submission(self):
+        """Test get Paper 2 submission status (Student)"""
+        print("\n🔍 Testing Get Paper 2 Submission Status...")
+        try:
+            if "Student" not in self.tokens:
+                return self.log_result("Get Paper 2 Submission", False, "No student token available")
+            
+            # Get available exams first
+            headers = {"Authorization": f"Bearer {self.tokens['Student']}"}
+            exams_response = requests.get(f"{self.base_url}/api/exams", headers=headers, timeout=10)
+            
+            if exams_response.status_code != 200:
+                return self.log_result("Get Paper 2 Submission", False, "Failed to get exams list")
+            
+            exams = exams_response.json()
+            if not exams:
+                return self.log_result("Get Paper 2 Submission", False, "No exams available")
+            
+            exam_id = exams[0]["id"]
+            
+            # Get submission status
+            response = requests.get(
+                f"{self.base_url}/api/exams/{exam_id}/paper2/submission",
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return self.log_result(
+                    "Get Paper 2 Submission",
+                    True,
+                    f"Status: {data.get('status')}"
+                )
+            else:
+                return self.log_result("Get Paper 2 Submission", False, f"Status: {response.status_code}")
+        except Exception as e:
+            return self.log_result("Get Paper 2 Submission", False, f"Error: {str(e)}")
 
     def test_parent_progress(self):
         """Test parent viewing student progress"""

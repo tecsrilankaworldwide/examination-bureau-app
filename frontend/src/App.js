@@ -1,53 +1,101 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './AuthContext';
+import Login from './pages/Login';
+import StudentDashboard from './pages/StudentDashboard';
+import ExamInterface from './pages/ExamInterface';
+import ParentDashboard from './pages/ParentDashboard';
+import TeacherDashboard from './pages/TeacherDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import ProgressReport from './pages/ProgressReport';
+import Paper2Submission from './pages/Paper2Submission';
+import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const PrivateRoute = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth();
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+const DashboardRouter = () => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  switch (user.role) {
+    case 'student':
+      return <StudentDashboard />;
+    case 'parent':
+      return <ParentDashboard />;
+    case 'teacher':
+      return <TeacherDashboard />;
+    case 'admin':
+      return <AdminDashboard />;
+    default:
+      return <Navigate to="/login" replace />;
+  }
 };
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <DashboardRouter />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/exam/:examId"
+            element={
+              <PrivateRoute allowedRoles={['student']}>
+                <ExamInterface />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/progress/:studentId"
+            element={
+              <PrivateRoute allowedRoles={['student', 'parent']}>
+                <ProgressReport />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/paper2/:examId"
+            element={
+              <PrivateRoute allowedRoles={['student', 'parent']}>
+                <Paper2Submission />
+              </PrivateRoute>
+            }
+          />
         </Routes>
-      </BrowserRouter>
-    </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

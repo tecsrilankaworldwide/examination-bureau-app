@@ -1,26 +1,10 @@
 [
   {
-    "content": "Phase 2: Implement Paper 2 Photo Upload (backend + frontend)",
+    "content": "Phase 2: Fix Paper 2 submission navigation link",
     "status": "completed"
   },
   {
-    "content": "Phase 2: Build Teacher Marking Interface",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: Add Blood Report Visualization Enhancements",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: Implement Sinhala Language UI Integration",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: Design and implement Hero Section",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: End to End Testing using Testing Agent",
+    "content": "Phase 2: End to End Testing using Testing Agent (Re-test after fix)",
     "status": "in_progress"
   }
 ]

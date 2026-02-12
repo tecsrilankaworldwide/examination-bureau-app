@@ -249,7 +249,7 @@ const HeroSection = () => {
               style={{ backgroundColor: '#E8F5E9', color: '#137B10' }}
             >
               <span>💳</span>
-              <span>{isSinhala ? 'LankaQR හා විවිධ යැතී පද්ධති සහාය' : 'LankaQR and multiple payment methods accepted'}</span>
+              <span>{isSinhala ? 'LankaQR හා විවිධ යැතී පද්ධති සහාය' : isTamil ? 'LankaQR மற்றும் பல கட்டண முறைகள் ஏற்கப்படுகின்றன' : 'LankaQR and multiple payment methods accepted'}</span>
             </div>
           </div>
         </div>
@@ -262,9 +262,11 @@ const HeroSection = () => {
             <p>
               {isSinhala
                 ? 'ස්‍රී ලංකා පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව'
+                : isTamil
+                ? 'இலங்கை தேர்வு மதிப்பீட்டு பணியகம்'
                 : 'Sri Lanka Examination Evaluation Bureau'}
             </p>
-            <p className="mt-2">© 2026 {isSinhala ? 'සියළු හක්කම් සුරක්ෂිතයි' : 'All rights reserved'}</p>
+            <p className="mt-2">© 2026 {isSinhala ? 'සියළු හක්කම් සුරක්ෂිතයි' : isTamil ? 'அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை' : 'All rights reserved'}</p>
           </div>
         </div>
       </footer>

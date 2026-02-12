@@ -1,475 +1,362 @@
 {
-  "project": "Examination Evaluation Bureau Platform (Sri Lanka Scholarship Exams, Grades 2-5)",
-  "brand_personality": ["official", "trustworthy", "student-friendly", "inclusive", "calm", "clarity-first"],
-  "audience": {
-    "primary": ["Students (7-11 years)"],
-    "secondary": ["Parents", "Teachers", "Administrators"],
-    "locale": "Sri Lanka",
-    "languages": ["Sinhala", "English"],
-    "bilingual_notes": "UI must gracefully accommodate mixed Sinhala/English text without layout shift. Prefer generous line-height and wider letterspacing for Sinhala, avoid ultra-condensed headings."
+  "brand_attributes": {
+    "name": "Examination Evaluation Bureau (EEB) – Scholarship Exams",
+    "personality": ["trustworthy", "government-standard", "student-first", "calm", "precise"],
+    "tone": "formal, bilingual (Sinhala + English), accessible, respectful"
   },
-  "visual_style": {
-    "aesthetic": "Government/Education professional with friendly edges",
-    "layout_style": ["Grid Layout", "Card Layout", "Bento Grid for dashboards", "Split-Screen hero"],
-    "effects": ["subtle glassmorphism on overlays", "micro-elevations", "light parallax in hero"],
-    "avoid": ["playful neon", "overly saturated gradients", "busy patterns"]
+  "goals_and_success": {
+    "student_parent": [
+      "Upload Paper 2 answer photos successfully",
+      "See per-file progress and a clear final submission state",
+      "Fix issues (retake, reorder, delete) before final submit"
+    ],
+    "teacher": [
+      "Filter submissions by grade/month/status",
+      "Open a submission, review photos in a carousel",
+      "Score 10 rubric skills quickly with sliders or inputs",
+      "Save Draft, add comments, then Finalize with confidence"
+    ],
+    "analytics": [
+      "Understand monthly skill-wise progress",
+      "Export charts to PDF for reports"
+    ]
   },
   "color_system": {
-    "rationale": "Grounded in Sri Lankan government tone: deep navy authority, sapphire for trust, Lankan gold accents for emphasis. Pastel tints for child-appropriate warmth without being childish.",
-    "tokens": {
-      "--background": "210 20% 98%",              
-      "--foreground": "224 71% 8%",                
-      "--muted": "210 16% 94%",                    
-      "--muted-foreground": "220 10% 40%",          
-      "--card": "0 0% 100%",                       
-      "--card-foreground": "224 71% 8%",
-
-      "--primary": "215 47% 18%",                  
-      "--primary-foreground": "0 0% 100%",
-
-      "--secondary": "209 42% 32%",                
-      "--secondary-foreground": "0 0% 100%",
-
-      "--accent": "44 62% 46%",                    
-      "--accent-foreground": "215 47% 18%",
-
-      "--info": "184 64% 33%",                    
-      "--success": "142 38% 36%",                 
-      "--warning": "32 95% 44%",                  
-      "--destructive": "0 72% 45%",               
-      "--ring": "210 20% 40%",
-
-      "--border": "210 16% 90%",                  
-      "--input": "210 16% 90%",
-
-      "--radius": "0.6rem"
+    "notes": "Sri Lankan flag colors applied with accessibility-first usage. Maroon as primary, green and saffron/orange as accents; gold as highlight/border.",
+    "tokens_hex": {
+      "maroon_primary": "#8D153A",
+      "maroon_primary_700": "#761233",
+      "green_accent": "#137B10",
+      "saffron_accent": "#E68100",
+      "gold": "#F4C430",
+      "neutral_bg": "#F5F7FA",
+      "neutral_card": "#FFFFFF",
+      "neutral_border": "#E5E7EB",
+      "text_strong": "#101828",
+      "text_muted": "#667085",
+      "success": "#1A7F37",
+      "warning": "#F79009",
+      "danger": "#D92D20",
+      "info": "#0F766E"
     },
-    "charts": {
-      "qualitative_10": [
-        "197 66% 45%", 
-        "171 52% 40%", 
-        "34 88% 44%", 
-        "14 86% 50%", 
-        "210 60% 44%", 
-        "160 43% 36%", 
-        "186 48% 35%", 
-        "28 72% 44%", 
-        "204 56% 36%", 
-        "46 72% 48%"
-      ],
-      "good": "142 38% 36%",
-      "average": "44 62% 46%",
-      "needs_attention": "14 86% 50%"
+    "tokens_hsl": {
+      "--background": "210 20% 98%",
+      "--foreground": "224 71% 8%",
+      "--card": "0 0% 100%",
+      "--border": "210 16% 90%",
+      "--primary": "338 74% 32%", 
+      "--primary-foreground": "0 0% 100%",
+      "--secondary": "148 79% 27%", 
+      "--secondary-foreground": "0 0% 100%",
+      "--accent": "32 100% 45%", 
+      "--accent-foreground": "224 71% 8%",
+      "--gold": "47 88% 58%", 
+      "--muted": "210 16% 94%",
+      "--muted-foreground": "220 10% 40%",
+      "--ring": "210 20% 40%",
+      "--success": "142 60% 32%",
+      "--warning": "32 95% 44%",
+      "--destructive": "0 72% 45%"
+    },
+    "usage": {
+      "primary": "Headings, primary CTAs, chart strokes for key metrics, active nav.",
+      "secondary": "Accents for success/positive states, toggle on hero badges.",
+      "accent": "Highlights, progress bars, file chip borders, hover states.",
+      "gold": "Hero separator lines, table header hairlines, stat highlights.",
+      "content_bg": "White cards on neutral background for readability.",
+      "status": {
+        "success": "Use on success badges, toasts, and finalized states.",
+        "warning": "Pending/in-progress; do not use for destructive actions.",
+        "danger": "Errors, deletions, rejections only."
+      }
     },
     "gradients": {
-      "hero_background": {
-        "description": "Calm daylight wash, authority to warmth",
-        "class": "bg-[radial-gradient(80%_60%_at_50%_10%,hsl(210_20%_98%)_0%,hsl(209_42%_95%)_40%,hsl(197_66%_96%)_70%,hsl(44_62%_95%)_100%)]",
-        "coverage_note": "Keep gradient areas under 20% viewport height except hero."
-      },
-      "accent_strip": {
-        "description": "Thin decorative strip for section dividers",
-        "class": "bg-[linear-gradient(90deg,hsl(209_42%_32%/0.08),hsl(44_62%_46%/0.08))]"
-      }
+      "rule": "Max 20% viewport, not for text-heavy areas. No dark/saturated stacks; enforce solid fallback.",
+      "hero_background": ["#FFF8E1", "#FDF4E7", "#F5FBF6"],
+      "cta_subtle": ["#FFF3D6", "#FFFDF5"],
+      "decorative_strip": ["#8D153A", "#F4C430", "#137B10"],
+      "fallback_if_breach": "Use solid #FFFFFF with gold hairlines if gradient harms readability."
     }
   },
   "typography": {
-    "font_pairs": {
-      "headings_en": "Chivo, Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif",
-      "body_en": "Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif",
-      "bilingual_sinhala": "\"Noto Sans Sinhala\", Malithi Web, \"Iskoola Pota\", sans-serif"
+    "english": {
+      "heading": "Chivo (existing)",
+      "body": "Inter (existing)"
     },
-    "load_instructions": {
-      "google_fonts": [
-        "https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap"
-      ],
-      "apply_css": "body { font-family: var(--font-body); } .font-sinhala { font-family: var(--font-sinhala); } .font-heading { font-family: var(--font-heading); }"
+    "sinhala": {
+      "family": "Noto Sans Sinhala, Malithi Web, Iskoola Pota (existing var --font-sinhala)",
+      "recommendations": "Use .font-sinhala class on Sinhala blocks; line-height 1.75; letter-spacing 0.025em for legibility."
     },
-    "css_vars": {
-      "--font-heading": "Chivo, Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif",
-      "--font-body": "Inter, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, sans-serif",
-      "--font-sinhala": "'Noto Sans Sinhala', 'Malithi Web', 'Iskoola Pota', sans-serif"
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl",
+      "h2": "text-base md:text-lg",
+      "body": "text-sm md:text-base",
+      "small": "text-xs sm:text-sm"
     },
-    "scales": {
-      "h1": "text-4xl sm:text-5xl lg:text-6xl leading-tight tracking-[-0.01em]",
-      "h2": "text-base md:text-lg font-semibold",
-      "body": "text-base sm:text-sm leading-7",
-      "small": "text-sm leading-6",
-      "label": "text-sm font-medium tracking-wide"
-    },
-    "sinhala_readability": "Use line-height 1.6–1.75 for Sinhala paragraphs, letter-spacing 0.2px–0.3px. Avoid all caps."
+    "do_dont": [
+      "Do not mix Sinhala/English fonts on the same word.",
+      "Use Sinhala numerals only where culturally expected (otherwise Arabic numerals).",
+      "Maintain consistent bilingual headings: Sinhala first, then English below."
+    ]
   },
-  "spacing_and_grid": {
-    "unit": 4,
-    "scale": [4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64],
-    "container": "max-w-[1120px] mx-auto px-4 sm:px-6 lg:px-8",
-    "grid": {
-      "mobile": 4,
-      "tablet": 8,
-      "desktop": 12,
-      "gaps": {"mobile": 12, "tablet": 16, "desktop": 24}
-    }
-  },
-  "iconography": {
-    "library": "lucide-react is preferred. Do not use emoji for UI icons.",
-    "size": {"sm": 16, "md": 20, "lg": 24}
-  },
-  "buttons": {
-    "shape": "Professional / Corporate",
-    "radius_token": "--btn-radius: 10px",
-    "variants": {
-      "primary": "bg-primary text-primary-foreground hover:bg-[hsl(215_47%_16%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(44_62%_46%)]",
-      "secondary": "bg-secondary text-secondary-foreground hover:bg-[hsl(209_42%_28%)]",
-      "ghost": "bg-transparent border border-[hsl(210_16%_90%)] hover:bg-[hsl(210_16%_94%)]"
-    },
-    "sizes": {
-      "sm": "h-9 px-3 text-sm",
-      "md": "h-11 px-5 text-base",
-      "lg": "h-12 px-7 text-base"
-    },
-    "motion": "hover:shadow-sm transition-colors duration-200 focus:scale-[0.99]"
-  },
-  "components": {
-    "paths": {
-      "button": "./components/ui/button.jsx",
-      "card": "./components/ui/card.jsx",
-      "progress": "./components/ui/progress.jsx",
-      "tabs": "./components/ui/tabs.jsx",
-      "table": "./components/ui/table.jsx",
-      "switch": "./components/ui/switch.jsx",
-      "select": "./components/ui/select.jsx",
-      "dialog": "./components/ui/dialog.jsx",
-      "alert": "./components/ui/alert.jsx",
-      "toast": "./components/ui/sonner.jsx",
-      "input": "./components/ui/input.jsx",
-      "textarea": "./components/ui/textarea.jsx",
-      "radio_group": "./components/ui/radio-group.jsx",
-      "checkbox": "./components/ui/checkbox.jsx",
-      "badge": "./components/ui/badge.jsx",
-      "carousel": "./components/ui/carousel.jsx",
-      "calendar": "./components/ui/calendar.jsx",
-      "tabs_group": "./components/ui/tabs.jsx",
-      "tooltip": "./components/ui/tooltip.jsx",
-      "skeleton": "./components/ui/skeleton.jsx"
-    },
-    "patterns": {
-      "hero": {
-        "layout": "Split-screen on desktop: left content, right decorative SVG/map and subtle parallax. Mobile: single column.",
-        "classes": "relative overflow-hidden",
-        "content_block": "py-16 sm:py-20 lg:py-24 space-y-6",
-        "title": "font-heading text-4xl sm:text-5xl lg:text-6xl text-[hsl(215_47%_18%)]",
-        "subtitle": "text-[hsl(220_10%_40%)] max-w-prose",
-        "actions": "flex flex-col sm:flex-row gap-3 sm:gap-4"
-      },
-      "exam_interface": {
-        "layout": "Header with timer and progress; two-column body on desktop (question + side navigation); single-column on mobile.",
-        "header_classes": "sticky top-0 z-30 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b",
-        "timer_classes": "text-[hsl(14_86%_50%)] font-semibold tracking-wide",
-        "question_card": "bg-card rounded-lg border p-5 sm:p-6",
-        "option": "rounded-lg border px-4 py-3 text-left hover:bg-[hsl(210_16%_94%)] focus-visible:ring-2 focus-visible:ring-[hsl(184_64%_33%)]",
-        "flag": "data-[active=true]:bg-[hsl(44_62%_96%)] data-[active=true]:ring-1 data-[active=true]:ring-[hsl(44_62%_46%)]"
-      },
-      "dashboard_cards": {
-        "card": "bg-white border rounded-xl p-5 hover:shadow-md transition-shadow",
-        "kpi_value": "text-2xl font-semibold text-[hsl(215_47%_18%)]",
-        "kpi_label": "text-[hsl(220_10%_40%)]"
-      },
-      "file_upload": {
-        "dropzone": "rounded-xl border-2 border-dashed border-[hsl(210_16%_90%)] bg-[hsl(210_16%_94%/0.5)] p-6 text-center hover:border-[hsl(209_42%_32%)] focus-visible:ring-2 focus-visible:ring-[hsl(184_64%_33%)]",
-        "preview": "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-      },
-      "teacher_marking": {
-        "rubric_row": "grid grid-cols-1 sm:grid-cols-12 items-center gap-3 p-3 rounded-lg hover:bg-[hsl(210_16%_94%/0.6)]",
-        "rubric_label": "sm:col-span-5 font-medium",
-        "rubric_control": "sm:col-span-7"
-      },
-      "language_toggle": {
-        "component": "switch",
-        "labeling": "Use 'සි' and 'EN' labels around Switch; ensure aria-label and data-testid attributes.",
-        "classes": "flex items-center gap-2 text-sm text-[hsl(220_10%_40%)]"
-      }
-    }
-  },
-  "pages": {
-    "landing_hero": {
-      "structure": ["Top bar with language toggle", "Hero split content", "3 trust badges (Gov crest, Data secure, WCAG AA)", "Callouts: Students | Parents | Teachers"],
-      "tailwind": {
-        "wrapper": "relative bg-white",
-        "hero": "container grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-16 lg:py-20",
-        "left": "lg:col-span-7 space-y-6",
-        "right": "lg:col-span-5 relative"
-      },
-      "cta_buttons": [
-        {"text": "Start Practice - සි", "variant": "primary", "data-testid": "hero-start-practice-button"},
-        {"text": "View Guidelines - EN", "variant": "ghost", "data-testid": "hero-view-guidelines-button"}
-      ]
-    },
-    "login": {
-      "layout": "Centered card with ministry crest, bilingual title, and social proof below",
-      "card": "max-w-md mx-auto p-6 sm:p-8 rounded-2xl border bg-white shadow-sm",
-      "fields": ["Email/ID", "Password", "Role select (Student/Parent/Teacher/Admin)"]
-    },
-    "student_dashboard": {
-      "layout": "Bento grid: Next Exam card, Quick Resume, Progress snapshot, Recent attempts",
-      "grid": "grid grid-cols-1 md:grid-cols-6 gap-4 md:gap-6",
-      "areas": {
-        "next_exam": "md:col-span-4",
-        "progress": "md:col-span-2",
-        "recent": "md:col-span-6"
-      }
-    },
-    "exam_interface": {
-      "header": ["Logo + title", "Timer prominent", "Question progress dots", "Flag button"],
-      "question_area": "MCQ options with radio-group, image where applicable, previous/next controls",
-      "nav_panel": "Question list with answered/flagged states and quick jump",
-      "accessibility": "All options reachable via keyboard; timer has aria-live polite until last 60s then assertive; never rely on color alone for states."
-    },
-    "results_page": {
-      "primary_viz": "Recharts RadarChart for 10 skills (blood report style) with colored bands and clear labels",
-      "secondary_viz": "Bar chart for recent 6 exams; badges for improvements",
-      "actions": ["Download PDF", "Share to Parent", "Start Remedial Practice"]
-    },
-    "paper2_submission": {
-      "flow": ["Instructions bilingual", "Drag-drop area", "Image previews with rotate/delete", "Submit with confirmation"],
-      "notes": "Compress images client-side if >2MB (downscale to 1600px wide)."
-    },
-    "teacher_dashboard": {
-      "sections": ["Submissions inbox with filters", "Rubric-based marking panel", "Image carousel preview"],
-      "filters": ["Status", "Grade", "School", "Date"]
-    },
-    "parent_dashboard": {
-      "widgets": ["Child card selector", "Progress snapshot", "Attendance/attempt history", "Recommendations"],
+  "layout_and_grids": {
+    "container": {
+      "max_width": "1200px",
+      "padding": "0 1rem",
       "mobile_first": true
     },
-    "progress_report": {
-      "charts": ["Radar (10 skills)", "Bar (trend)", "Donut (accuracy vs attempts)"],
-      "export": "PDF/A4 with bilingual headers"
+    "paper2_upload": {
+      "mobile": "single column: dropzone -> file list -> submission panel",
+      "md_up": "grid-cols-[1.5fr,1fr] with 24px gap: left dropzone + previews; right submission status panel"
+    },
+    "teacher_marking": {
+      "filters_row": "responsive wrap row of Selects and Search (1fr auto auto)",
+      "content_split": "md_up: 2 columns: list (1fr) | details drawer/carousel (sheet/drawer on mobile)",
+      "rubric_grid": "5x2 rubric cards or a single Card with 10 Slider rows"
+    },
+    "analytics": {
+      "top_filters": "month Select + grade Tabs",
+      "grid": "md: grid-cols-2 (left per-skill line chart, right radar); sm: stacked"
+    },
+    "hero": {
+      "structure": "split-screen on lg: left bilingual copy + CTAs; right illustrative image/card stack; stacked on mobile",
+      "compliance": "Government-standard clarity: logo, title, description, primary action first"
+    }
+  },
+  "components_spec": {
+    "shared": {
+      "button": {
+        "use": "./frontend/src/components/ui/button.jsx",
+        "variants": {
+          "primary": "maroon fill, white text",
+          "secondary": "green fill, white text",
+          "ghost": "text maroon, subtle bg hover"
+        },
+        "motion": "hover:bg-opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2",
+        "testing": "Add data-testid=\"primary-cta-button\" etc"
+      },
+      "card": "./frontend/src/components/ui/card.jsx",
+      "badge": "./frontend/src/components/ui/badge.jsx",
+      "progress": "./frontend/src/components/ui/progress.jsx",
+      "input": "./frontend/src/components/ui/input.jsx",
+      "textarea": "./frontend/src/components/ui/textarea.jsx",
+      "select": "./frontend/src/components/ui/select.jsx",
+      "tabs": "./frontend/src/components/ui/tabs.jsx",
+      "table": "./frontend/src/components/ui/table.jsx",
+      "slider": "./frontend/src/components/ui/slider.jsx",
+      "dialog": "./frontend/src/components/ui/dialog.jsx",
+      "sheet": "./frontend/src/components/ui/sheet.jsx",
+      "carousel": "./frontend/src/components/ui/carousel.jsx",
+      "tooltip": "./frontend/src/components/ui/tooltip.jsx",
+      "sonner_toast": "./frontend/src/components/ui/sonner.jsx"
+    },
+    "paper2_photo_upload": {
+      "layout": "Card with header (title + Sinhala subtitle) and body split: left drop area, right status.",
+      "drop_area": {
+        "component": "Custom UploadDropzone (compose Card + Input[type=file] + area)",
+        "style": "dashed border, 12px radius, icon center, bilingual label",
+        "micro": [
+          "onDragEnter: border-color shifts to --accent",
+          "onDrop: show Progress and preview chips with remove"
+        ],
+        "testing": [
+          "data-testid=\"paper2-dropzone\"",
+          "data-testid=\"paper2-file-input\""
+        ]
+      },
+      "previews": {
+        "component": "Carousel for full-screen preview; small list with Badge(status)",
+        "testing": ["data-testid=\"paper2-file-item\"", "data-testid=\"paper2-remove-file-button\""]
+      },
+      "status_panel": {
+        "items": ["Upload count", "Progress bar", "Submission status (Draft/Submitted)", "Submit button"],
+        "testing": ["data-testid=\"paper2-submit-button\"", "data-testid=\"paper2-progress\""]
+      }
+    },
+    "teacher_marking": {
+      "filters": {
+        "components": ["Select (Grade)", "Select (Month)", "Select (Status)", "Input (Search)", "Button (Reset)"]
+      },
+      "list": {
+        "component": "Table with sortable columns",
+        "row": "Candidate name, Grade, Received date, Status badge, Open button",
+        "testing": ["data-testid=\"marking-row\"", "data-testid=\"open-marking-detail-button\""]
+      },
+      "detail_view": {
+        "pattern": "Sheet on mobile, Side panel on desktop",
+        "media": "Carousel of uploaded pages with zoom",
+        "rubric": "10 Slider rows with numeric input fallback",
+        "actions": ["Save Draft (secondary)", "Finalize (primary)"]
+      }
+    },
+    "analytics_charts": {
+      "charts": [
+        "Per-skill LineChart with month filter",
+        "RadarChart overview of 10 skills"
+      ],
+      "export": "Button to export current view as PDF"
+    },
+    "language_toggle": {
+      "component": "DropdownMenu in header: Sinhala / English",
+      "testing": ["data-testid=\"language-toggle\"", "data-testid=\"language-option-si\"", "data-testid=\"language-option-en\""]
+    },
+    "hero_section": {
+      "elements": ["Gov logo + title in Sinhala & English", "Subheading", "CTAs: Login/Register", "Benefits grid", "Pricing in LKR", "LankaQR mention"]
+    }
+  },
+  "tailwind_and_tokens": {
+    "css_tokens_to_add": ":root { --maroon: 338 74% 32%; --green: 148 79% 27%; --saffron: 32 100% 45%; --gold: 47 88% 58%; }",
+    "button_classes": {
+      "primary": "inline-flex items-center justify-center rounded-md bg-[hsl(var(--primary))] text-white px-4 py-2 text-sm font-medium hover:bg-[hsl(var(--primary)_/_0.92)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--gold))] focus-visible:ring-offset-2 transition-colors",
+      "secondary": "inline-flex items-center justify-center rounded-md bg-[hsl(var(--secondary))] text-white px-4 py-2 text-sm font-medium hover:bg-[hsl(var(--secondary)_/_0.92)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--gold))] focus-visible:ring-offset-2 transition-colors",
+      "ghost": "inline-flex items-center justify-center rounded-md text-[hsl(var(--primary))] px-4 py-2 text-sm font-medium hover:bg-[hsl(var(--muted))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--gold))] focus-visible:ring-offset-2 transition-colors"
+    },
+    "status_badges": {
+      "draft": "bg-yellow-50 text-yellow-800 border border-yellow-200",
+      "submitted": "bg-green-50 text-green-800 border border-green-200",
+      "rejected": "bg-red-50 text-red-800 border border-red-200"
     }
   },
   "micro_interactions_and_motion": {
-    "library": "framer-motion",
-    "rules": [
-      "Use motion only on entrance and hover; prefer 150–250ms ease-out.",
-      "Do not use transition: all; target only color, opacity, shadow.",
-      "Timer blinks and gently shakes at <60s, increases at <10s.",
-      "Correct answer: subtle confetti via lottie; wrong: supportive hint pulse."
+    "principles": [
+      "No universal 'transition: all'; animate only color, opacity, box-shadow.",
+      "Entrance animations: fade and slight translate for cards and modals.",
+      "Hover: subtle elevation for cards, color shift for CTAs.",
+      "Scroll parallax: hero decorative strip only, not content."
     ],
-    "examples": {
-      "button": "hover:translate-y-[-1px] hover:shadow-sm transition-colors duration-200",
-      "card_entrance": "Spring up from 4px with opacity fade-in"
+    "framer_motion_examples": {
+      "card_entrance_jsx": "<motion.div initial={{opacity:0, y:8}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.3, ease:'easeOut'}}></motion.div>",
+      "button_press_jsx": "<motion.button whileTap={{scale:0.98}} className=\"...\"></motion.button>"
     }
+  },
+  "feature_scaffolds_jsx": {
+    "paper2_upload": "import React from 'react';\nimport { Card } from './frontend/src/components/ui/card.jsx';\nimport { Button } from './frontend/src/components/ui/button.jsx';\nimport { Progress } from './frontend/src/components/ui/progress.jsx';\nimport { Dialog, DialogContent, DialogHeader, DialogTitle } from './frontend/src/components/ui/dialog.jsx';\nimport { useDropzone } from 'react-dropzone';\n\nexport default function Paper2Upload() {\n  const [files, setFiles] = React.useState([]);\n  const [submitting, setSubmitting] = React.useState(false);\n  const onDrop = React.useCallback((accepted) => {\n    const withMeta = accepted.map((f) => ({ file: f, progress: 0, id: crypto.randomUUID() }));\n    setFiles((prev) => [...prev, ...withMeta]);\n    // start fake progress; replace with real upload\n  }, []);\n  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] } });\n\n  return (\n    <div className=\"container grid md:grid-cols-[1.5fr_1fr] gap-6\">\n      <Card className=\"p-6\">\n        <div {...getRootProps({ className: `border-2 border-dashed rounded-xl p-8 text-center transition-colors ${isDragActive ? 'border-[hsl(var(--accent))] bg-amber-50' : 'border-[hsl(var(--border))]'}` })} data-testid=\"paper2-dropzone\">\n          <input {...getInputProps()} data-testid=\"paper2-file-input\" />\n          <p className=\"font-sinhala text-sm text-[hsl(var(--muted-foreground))]\">ඡායාරූප පතන - මෙතැනට ඇදලා හෝ තෝරන්න</p>\n          <p className=\"text-sm text-[hsl(var(--muted-foreground))]\">Drag and drop photos here or click to select</p>\n          <Button className=\"mt-3\" data-testid=\"paper2-browse-button\">Browse</Button>\n        </div>\n        <ul className=\"mt-6 space-y-3\">\n          {files.map((f) => (\n            <li key={f.id} className=\"flex items-center gap-3\" data-testid=\"paper2-file-item\">\n              <div className=\"flex-1 truncate\">{f.file.name}</div>\n              <div className=\"w-40\"><Progress value={f.progress} data-testid=\"paper2-progress\" /></div>\n              <Button variant=\"ghost\" onClick={() => setFiles(files.filter(x => x.id !== f.id))} data-testid=\"paper2-remove-file-button\">Remove</Button>\n            </li>\n          ))}\n        </ul>\n      </Card>\n      <Card className=\"p-6 space-y-4\">\n        <div className=\"flex items-center justify-between\">\n          <h3 className=\"font-semibold\">Submission</h3>\n          <span className=\"status-badge in-progress\">Draft</span>\n        </div>\n        <Button disabled={!files.length || submitting} onClick={() => setSubmitting(true)} className=\"w-full\" data-testid=\"paper2-submit-button\">Submit</Button>\n      </Card>\n    </div>\n  );\n}",
+    "teacher_marking_detail": "import React from 'react';\nimport { Sheet, SheetContent } from './frontend/src/components/ui/sheet.jsx';\nimport { Button } from './frontend/src/components/ui/button.jsx';\nimport { Slider } from './frontend/src/components/ui/slider.jsx';\nimport { Textarea } from './frontend/src/components/ui/textarea.jsx';\n\nexport function MarkingDetail({ open, onOpenChange, submission }) {\n  const [scores, setScores] = React.useState(Array(10).fill(0));\n  const total = scores.reduce((a,b)=>a+b,0);\n  const update = (i, v) => setScores((s) => s.map((x, idx) => idx === i ? v[0] : x));\n  return (\n    <Sheet open={open} onOpenChange={onOpenChange}>\n      <SheetContent className=\"w-full sm:w-[520px] space-y-6\">\n        <div>\n          <h3 className=\"font-semibold\">{submission?.studentName}</h3>\n          <p className=\"text-sm text-[hsl(var(--muted-foreground))]\">Grade {submission?.grade} · {submission?.month}</p>\n        </div>\n        <div className=\"space-y-4\">\n          {Array.from({length:10}).map((_,i)=> (\n            <div key={i} className=\"space-y-2\">\n              <div className=\"flex items-center justify-between\">\n                <span>Skill {i+1}</span>\n                <span className=\"text-sm text-[hsl(var(--muted-foreground))]\">{scores[i]}</span>\n              </div>\n              <Slider min={0} max={10} step={1} value={[scores[i]]} onValueChange={(v)=>update(i,v)} data-testid=\"rubric-slider\" />\n            </div>\n          ))}\n        </div>\n        <div>\n          <label className=\"text-sm font-medium\">Comments</label>\n          <Textarea rows={4} placeholder=\"Notes for the student\" data-testid=\"rubric-comment-textarea\" />\n        </div>\n        <div className=\"flex gap-3\">\n          <Button variant=\"secondary\" data-testid=\"save-draft-button\">Save Draft</Button>\n          <Button className=\"ml-auto\" data-testid=\"finalize-button\">Finalize</Button>\n          <div className=\"ml-4 text-sm text-[hsl(var(--muted-foreground))]\">Total: <span className=\"font-semibold\">{total}</span></div>\n        </div>\n      </SheetContent>\n    </Sheet>\n  );\n}",
+    "recharts_block": "import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend } from 'recharts';\n\nconst colors = { primary: '#8D153A', green: '#137B10', gold: '#F4C430' };\n\nexport function SkillTrend({ data }) {\n  return (\n    <div className=\"h-64\">\n      <ResponsiveContainer width=\"100%\" height=\"100%\">\n        <LineChart data={data}>\n          <CartesianGrid strokeDasharray=\"3 3\" stroke=\"#E5E7EB\" />\n          <XAxis dataKey=\"month\" />\n          <YAxis domain={[0,10]} />\n          <Tooltip contentStyle={{ borderRadius: 8, borderColor: '#E5E7EB' }} />\n          <Line type=\"monotone\" dataKey=\"score\" stroke={colors.primary} strokeWidth={2} dot={{ r: 2 }} />\n        </LineChart>\n      </ResponsiveContainer>\n    </div>\n  );\n}\n\nexport function SkillsRadar({ data }) {\n  return (\n    <div className=\"h-72\">\n      <ResponsiveContainer width=\"100%\" height=\"100%\">\n        <RadarChart data={data}>\n          <PolarGrid />\n          <PolarAngleAxis dataKey=\"skill\" tick={{ fontSize: 12 }} />\n          <PolarRadiusAxis domain={[0,10]} />\n          <Radar name=\"Avg\" dataKey=\"value\" stroke={colors.green} fill={colors.green} fillOpacity={0.2} />\n          <Legend />\n          <Tooltip />\n        </RadarChart>\n      </ResponsiveContainer>\n    </div>\n  );\n}",
+    "export_pdf": "import jsPDF from 'jspdf';\nimport html2canvas from 'html2canvas';\n\nexport async function exportChartsToPDF(rootId = 'charts-root') {\n  const el = document.getElementById(rootId);\n  const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });\n  const imgData = canvas.toDataURL('image/png');\n  const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });\n  const w = pdf.internal.pageSize.getWidth();\n  const h = (canvas.height * w) / canvas.width;\n  pdf.addImage(imgData, 'PNG', 0, 0, w, h);\n  pdf.save('eeb-progress.pdf');\n}"
+  },
+  "language_and_bilingual": {
+    "library": "i18next + react-i18next",
+    "header_toggle_jsx": "import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './frontend/src/components/ui/dropdown-menu.jsx';\nimport { Globe } from 'lucide-react';\n\nexport function LanguageToggle() {\n  return (\n    <DropdownMenu>\n      <DropdownMenuTrigger className=\"btn btn-outline\" data-testid=\"language-toggle\"><Globe className=\"mr-2 h-4 w-4\" />සිං / EN</DropdownMenuTrigger>\n      <DropdownMenuContent align=\"end\">\n        <DropdownMenuItem onSelect={() => i18n.changeLanguage('si')} data-testid=\"language-option-si\">සිංහල</DropdownMenuItem>\n        <DropdownMenuItem onSelect={() => i18n.changeLanguage('en')} data-testid=\"language-option-en\">English</DropdownMenuItem>\n      </DropdownMenuContent>\n    </DropdownMenu>\n  );\n}",
+    "sinhala_best_practices": [
+      "Set .font-sinhala on large Sinhala blocks and headings.",
+      "Keep line-height >= 1.7 for Sinhala paragraphs.",
+      "Use meaningful Sinhala labels on all form controls and aria-labels."
+    ]
+  },
+  "hero_section_spec": {
+    "layout": "Top header with logo + language toggle. Hero with bilingual H1, subtitle, CTAs (Login/Register). Benefits (3-4 cards) and Pricing. LankaQR mention as a small badge under pricing.",
+    "sample_copy": {
+      "si_h1": "ශ්‍රී ලංකා ශිෂ්‍යත්ව විභාග - ඇගයීම් ගැලරිය",
+      "en_h1": "Sri Lanka Scholarship Exams – Evaluation Portal",
+      "cta_login": "Login",
+      "cta_register": "Register"
+    },
+    "visuals": {
+      "background": "subtle diagonal gradient top-right: #FFF8E1 -> #F5FBF6 (<=20% viewport)",
+      "accent_strip": "3px gold rule under heading or slim maroon-green-gold bar"
+    },
+    "testing": ["data-testid=\"hero-login-button\"", "data-testid=\"hero-register-button\""]
   },
   "accessibility": {
-    "contrast": "All text meets WCAG AA. Primary on white >= 7:1 for small text.",
-    "touch_targets": ">=44px on mobile for options and nav dots.",
-    "focus": "Visible 2px ring using --info color; never removed.",
-    "aria": ["aria-live for timer", "aria-describedby for question images", "role=group for option sets"],
-    "lang_attr": "Set html lang dynamically: si or en"
-  },
-  "testing_attributes": {
-    "policy": "Every interactive and key informational element MUST include data-testid in kebab-case describing role.",
-    "examples": [
-      "data-testid=\"login-form-submit-button\"",
-      "data-testid=\"exam-timer\"",
-      "data-testid=\"mcq-option-1\"",
-      "data-testid=\"question-flag-toggle\"",
-      "data-testid=\"paper2-dropzone\"",
-      "data-testid=\"teacher-rubric-score-select\"",
-      "data-testid=\"results-radar-chart\""
-    ]
-  },
-  "code_scaffolds_jsx": {
-    "LanguageToggle": "import { Switch } from './components/ui/switch.jsx';\nexport const LanguageToggle = ({ value='si', onChange }) => (\n  <div className=\"flex items-center gap-2\" data-testid=\"language-toggle\">\n    <span className=\"text-sm\">සි</span>\n    <Switch checked={value==='en'} onCheckedChange={(v)=>onChange(v?'en':'si')} aria-label=\"Language toggle\" data-testid=\"language-toggle-switch\"/>\n    <span className=\"text-sm\">EN</span>\n  </div>\n);",
-    "ExamHeader": "import { Button } from './components/ui/button.jsx';\nimport { Progress } from './components/ui/progress.jsx';\nexport const ExamHeader = ({ timeLeft, progress }) => (\n  <header className=\"sticky top-0 z-30 bg-white/90 backdrop-blur border-b\">\n    <div className=\"max-w-[1120px] mx-auto px-4 h-14 flex items-center justify-between\">\n      <div className=\"font-semibold\">Scholarship Examination</div>\n      <div className=\"flex items-center gap-4\">\n        <div className=\"text-[hsl(14_86%_50%)] font-semibold\" aria-live=\"polite\" data-testid=\"exam-timer\">{timeLeft}</div>\n        <Button variant=\"ghost\" data-testid=\"question-flag-toggle\">Flag</Button>\n      </div>\n    </div>\n    <div className=\"max-w-[1120px] mx-auto px-4 py-2\">\n      <Progress value={progress} data-testid=\"exam-progress\" />\n    </div>\n  </header>\n);",
-    "MCQOptions": "import { RadioGroup, RadioGroupItem } from './components/ui/radio-group.jsx';\nimport { Label } from './components/ui/label.jsx';\nexport const MCQOptions = ({ options, value, onChange }) => (\n  <RadioGroup value={value} onValueChange={onChange} className=\"grid gap-3\" data-testid=\"mcq-options\">\n    {options.map((opt, idx) => (\n      <div key={idx} className=\"rounded-lg border px-4 py-3 hover:bg-[hsl(210_16%_94%)]\">\n        <div className=\"flex items-start gap-3\">\n          <RadioGroupItem value={String(idx)} id={\`opt-\${idx}\`} data-testid={\`mcq-option-\${idx}\`} />\n          <Label htmlFor={\`opt-\${idx}\`} className=\"flex-1 cursor-pointer\">{opt}</Label>\n        </div>\n      </div>\n    ))}\n  </RadioGroup>\n);",
-    "Paper2Dropzone": "import { useCallback } from 'react';\nimport { useDropzone } from 'react-dropzone';\nexport const Paper2Dropzone = ({ onFiles }) => {\n  const onDrop = useCallback((accepted) => onFiles(accepted), [onFiles]);\n  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] } });\n  return (\n    <div {...getRootProps()} className=\"rounded-xl border-2 border-dashed p-6 text-center bg-[hsl(210_16%_94%/0.5)]\" data-testid=\"paper2-dropzone\">\n      <input {...getInputProps()} />\n      {isDragActive ? 'Drop images here' : 'Drag & drop answer images, or click to select'}\n    </div>\n  );\n};",
-    "ResultsRadar": "import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';\nexport const ResultsRadar = ({ data }) => (\n  <div className=\"w-full h-[360px]\" data-testid=\"results-radar-chart\">\n    <RadarChart cx=\"50%\" cy=\"50%\" outerRadius=\"80%\" width={600} height={360} data={data}>\n      <PolarGrid />\n      <PolarAngleAxis dataKey=\"skill\" tick={{ fontSize: 12 }} />\n      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />\n      <Radar dataKey=\"score\" stroke=\"#1F8A70\" fill=\"#1F8A70\" fillOpacity={0.4} />\n    </RadarChart>\n  </div>\n);"
-  },
-  "libraries_and_setup": {
-    "required": [
-      {"name": "recharts", "reason": "Charts for progress and radar"},
-      {"name": "framer-motion", "reason": "Entrance/micro animations"},
-      {"name": "react-dropzone", "reason": "Accessible drag & drop upload"},
-      {"name": "lottie-react", "reason": "Subtle confetti on success"}
+    "wcag": [
+      "Color contrast AA minimum on all text (maroon on white passes).",
+      "Visible focus ring using gold token (2px).",
+      "All charts have text equivalents (table of values optional).",
+      "Keyboard operable: sliders via arrows, dropdown via Enter/Space.",
+      "ARIA labels bilingual as appropriate."
     ],
-    "install": "npm i recharts framer-motion react-dropzone lottie-react",
-    "usage_notes": [
-      "Always wrap toasts using ./components/ui/sonner.jsx",
-      "Prefer shadcn/ui components from ./components/ui for inputs, selects, dialogs, calendars"
-    ]
+    "testing_ids_policy": "All interactive and key informational elements MUST include a data-testid attribute (kebab-case by role)."
   },
-  "charts_spec": {
-    "radar_10_skills": {
-      "data_shape": "[{ skill: 'Math', score: 80 }, ...] (10 items)",
-      "palette_indexing": "Map in order to color fill or stroke subtly; keep 0.4 opacity",
-      "empty_state": "Show dashed grid with 'No data yet' and CTA to start practice"
+  "images_urls": [
+    {
+      "category": "hero",
+      "description": "Sri Lankan students/community context (neutral, respectful)",
+      "url": "https://images.unsplash.com/photo-1720944519195-76650ee46844?crop=entropy&cs=srgb&fm=jpg&q=85"
     },
-    "bar_trend": {
-      "bars": 6,
-      "colors": "Use --secondary for bars, --accent for highlight",
-      "axes": "12px ticks, 10px labels on mobile"
+    {
+      "category": "benefits_or_testimonials",
+      "description": "Sri Lankan students in uniform (contextual)",
+      "url": "https://images.unsplash.com/photo-1603056218836-485b716ac4ad?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    {
+      "category": "community",
+      "description": "Local context, parents and teachers",
+      "url": "https://images.unsplash.com/photo-1509763988163-d54b5f5d5b67?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    {
+      "category": "community_alt",
+      "description": "Young student perspective",
+      "url": "https://images.unsplash.com/photo-1726664176068-53e67a1478fd?crop=entropy&cs=srgb&fm=jpg&q=85"
     }
-  },
-  "images": {
-    "usage": "Use culturally relevant, respectful imagery of Sri Lankan classrooms and learning moments. Do not overuse photos; 1 hero, 1-2 supporting in dashboards.",
-    "image_urls": [
-      {
-        "url": "https://images.unsplash.com/photo-1603056218836-485b716ac4ad",
-        "description": "Sri Lankan students walking in town (contextual, neutral)",
-        "category": "hero_supporting"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1745184153304-950a6449c0ea",
-        "description": "Primary school style building entrance (abstract backdrop)",
-        "category": "dashboard_banner"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1707879406529-1c6b24794005",
-        "description": "Historic school architecture feel (texture card)",
-        "category": "content_illustration"
-      }
-    ]
-  },
-  "i18n": {
-    "strategy": "Centralize strings with keys; provide Sinhala and English translations. Auto-size headings; avoid hard widths on labels.",
-    "components": ["LanguageToggle", "Bilingual page titles", "PDF export supports Unicode Sinhala"]
-  },
-  "page_specific_details": {
-    "landing": {
-      "bilingual_title_example": "\u0dc3\u0dbb\u0da7\u0dba\u0db1\u0db8\u0dca \u0db4\u0dcf\u0dab\u0db1\u0dca \u0d9c\u0ddc\u0dab\u0dd2\u0daf\u0dd2\u0daf\u0dd2 | Building the Nation's New Generation",
-      "trust_row": "3 simple badges with concise captions; no animation"
-    },
-    "login": {
-      "fields_testids": ["login-email-input", "login-password-input", "login-role-select", "login-form-submit-button"]
-    },
-    "exam": {
-      "states": ["unanswered (neutral border)", "answered (solid secondary)", "flagged (accent ring)", "current (primary outline)"],
-      "timer_thresholds": {"warn": 60, "critical": 10}
-    },
-    "results": {
-      "badges": ["Top 10%", "Improved", "Consistent"],
-      "pdf_header": "Include bilingual masthead + student details + seal"
-    },
-    "paper2": {
-      "image_controls": ["rotate", "delete", "caption optional"],
-      "validation": "Min 1 image, max 8, only jpg/png, each < 2MB suggested"
-    },
-    "teacher": {
-      "rubric_fields": ["Clarity", "Grammar", "Structure", "Relevance", "Creativity"],
-      "shortcuts": "Arrow keys to move submissions; S to save; F to toggle full image"
-    },
-    "parent": {
-      "callouts": ["Strengths", "Areas to focus", "Recommended practice sets"]
-    }
-  },
-  "noise_and_textures": {
-    "subtle_noise_css": "background-image: radial-gradient(hsla(0,0%,0%,0.02) 1px, transparent 1px); background-size: 24px 24px;",
-    "where": ["hero overlay", "section dividers", "empty states"]
-  },
+  ],
   "component_path": {
-    "shadcn": [
-      "./components/ui/button.jsx",
-      "./components/ui/card.jsx",
-      "./components/ui/progress.jsx",
-      "./components/ui/tabs.jsx",
-      "./components/ui/table.jsx",
-      "./components/ui/switch.jsx",
-      "./components/ui/select.jsx",
-      "./components/ui/dialog.jsx",
-      "./components/ui/alert.jsx",
-      "./components/ui/sonner.jsx",
-      "./components/ui/input.jsx",
-      "./components/ui/textarea.jsx",
-      "./components/ui/radio-group.jsx",
-      "./components/ui/checkbox.jsx",
-      "./components/ui/badge.jsx",
-      "./components/ui/carousel.jsx",
-      "./components/ui/calendar.jsx",
-      "./components/ui/tooltip.jsx",
-      "./components/ui/skeleton.jsx"
-    ],
-    "third_party": ["recharts", "react-dropzone", "framer-motion", "lottie-react"]
+    "button": "/app/frontend/src/components/ui/button.jsx",
+    "card": "/app/frontend/src/components/ui/card.jsx",
+    "progress": "/app/frontend/src/components/ui/progress.jsx",
+    "select": "/app/frontend/src/components/ui/select.jsx",
+    "tabs": "/app/frontend/src/components/ui/tabs.jsx",
+    "table": "/app/frontend/src/components/ui/table.jsx",
+    "slider": "/app/frontend/src/components/ui/slider.jsx",
+    "dialog": "/app/frontend/src/components/ui/dialog.jsx",
+    "sheet": "/app/frontend/src/components/ui/sheet.jsx",
+    "carousel": "/app/frontend/src/components/ui/carousel.jsx",
+    "textarea": "/app/frontend/src/components/ui/textarea.jsx",
+    "dropdown_menu": "/app/frontend/src/components/ui/dropdown-menu.jsx",
+    "sonner": "/app/frontend/src/components/ui/sonner.jsx",
+    "calendar": "/app/frontend/src/components/ui/calendar.jsx"
+  },
+  "libraries_and_install": {
+    "charting": {
+      "recharts": "already in stack — ensure v2 or above"
+    },
+    "animation": {
+      "framer_motion": "already in stack"
+    },
+    "upload": {
+      "react_dropzone": "npm i react-dropzone"
+    },
+    "i18n": {
+      "i18next": "npm i i18next react-i18next",
+      "notes": "Persist language in localStorage; default Sinhala."
+    },
+    "export_pdf": {
+      "jspdf_html2canvas": "npm i jspdf html2canvas"
+    },
+    "icons": {
+      "lucide_react": "npm i lucide-react (if not present)"
+    }
+  },
+  "qa_and_testing": {
+    "data_testid_required": true,
+    "examples": [
+      "data-testid=\"paper2-dropzone\"",
+      "data-testid=\"open-marking-detail-button\"",
+      "data-testid=\"export-pdf-button\"",
+      "data-testid=\"language-toggle\""
+    ]
   },
   "instructions_to_main_agent": [
-    "Set CSS custom properties in :root to match color_system.tokens; do not rely on defaults.",
-    "Adopt font loading snippet in index.html and update body font via --font-body; add .font-sinhala where Sinhala is forced (e.g., headings in Sinhala locales).",
-    "Implement data-testid attributes on every interactive and key informational element using kebab-case role names.",
-    "Use shadcn components from ./components/ui only; do not use native HTML selects/dropdowns where a shadcn equivalent exists.",
-    "Add react-dropzone for Paper 2 upload. Style with file_upload.dropzone classes and include preview grid.",
-    "Use Recharts RadarChart and BarChart exactly as specified; keep fonts readable (>=12px ticks).",
-    "Respect gradient restriction rule: limit decorative gradients to hero and thin section accents only.",
-    "Mobile-first: stack columns; ensure 44px tap targets for options and navigation.",
-    "Timer: aria-live polite; switch to assertive below 10s and add subtle shake animation.",
-    "WCAG: Ensure focus rings visible and maintain 2–3x whitespace vs dense defaults."
+    "Add/verify color tokens in index.css per 'color_system.tokens_hsl' and 'tailwind_and_tokens.css_tokens_to_add'.",
+    "Implement Paper2Upload using UploadDropzone + Progress + Carousel; ensure bilingual labels.",
+    "Build Teacher Marking page: filters row (Selects), Table list, Sheet detail with 10 sliders, comments, Save/Finalize.",
+    "Construct Analytics: SkillTrend (LineChart) + SkillsRadar (RadarChart) with month filter and Export PDF.",
+    "Add LanguageToggle in header; initialize i18next for si/en.",
+    "Create hero per 'hero_section_spec' with Sri Lankan flag colors; ensure gradient rules.",
+    "Use Sonner toasts for success/error; include Sinhala messages.",
+    "Add data-testid to all interactive and key informational elements."
   ],
-  "data_testid_matrix": {
-    "landing": ["language-toggle", "hero-start-practice-button", "hero-view-guidelines-button"],
-    "login": ["login-email-input", "login-password-input", "login-role-select", "login-form-submit-button"],
-    "student_dashboard": ["next-exam-card", "progress-widget", "recent-attempts-table"],
-    "exam": ["exam-timer", "mcq-options", "mcq-option-0", "question-flag-toggle", "question-next-button", "question-prev-button"],
-    "results": ["results-radar-chart", "results-trend-chart", "download-pdf-button"],
-    "paper2": ["paper2-dropzone", "paper2-preview-0", "paper2-submit-button"],
-    "teacher": ["teacher-filter-select", "teacher-submission-row", "teacher-rubric-score-select", "teacher-save-grade-button"],
-    "parent": ["child-selector", "parent-progress-radar", "recommendation-card"]
-  }
+  "web_references_and_inspiration": [
+    {
+      "title": "ICTA Sri Lanka – Government Websites 4.0",
+      "url": "https://www.icta.lk/icta-assets/uploads/2022/03/Guidelines-for-developing-Sri-Lanka-Government-Websites-4.0.pdf",
+      "notes": "Trilingual, accessibility, mobile-first mandates"
+    },
+    {
+      "title": "Best Government Website Design – ImageX",
+      "url": "https://imagexmedia.com/blog/best-government-website-design",
+      "notes": "Clear top tasks, clean hero patterns"
+    }
+  ],
+  "general_ui_ux_design_guidelines": "- You must **not** apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms\n    - You must **not** center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text\n   - NEVER: use AI assistant Emoji characters like`🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons. Always use **FontAwesome cdn** or **lucid-react** library already installed in the package.json\n\n **GRADIENT RESTRICTION RULE**\nNEVER use dark/saturated gradient combos (e.g., purple/pink) on any UI element.  Prohibited gradients: blue-500 to purple 600, purple 500 to pink-500, green-500 to blue-500, red to pink etc\nNEVER use dark gradients for logo, testimonial, footer etc\nNEVER let gradients cover more than 20% of the viewport.\nNEVER apply gradients to text-heavy content or reading areas.\nNEVER use gradients on small UI elements (<100px width).\nNEVER stack multiple gradient layers in the same viewport.\n\n**ENFORCEMENT RULE:**\n    • Id gradient area exceeds 20% of viewport OR affects readability, **THEN** use solid colors\n\n**How and where to use:**\n   • Section backgrounds (not content backgrounds)\n   • Hero section header content. Eg: dark to light to dark color\n   • Decorative overlays and accent elements only\n   • Hero section with 2-3 mild color\n   • Gradients creation can be done for any angle say horizontal, vertical or diagonal\n\n- For AI chat, voice application, **do not use purple color. Use color like light green, ocean blue, peach orange etc**\n\n</Font Guidelines>\n\n- Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead. \n   \n- Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.\n\n- Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.\n   \n- Before generating UI, infer the visual style from the problem statement (palette, contrast, mood, motion) and immediately instantiate it by setting global design tokens (primary, secondary/accent, background, foreground, ring, state colors), rather than relying on any library defaults. Don't make the background dark as a default step, always understand problem first and define colors accordingly\n    Eg: - if it implies playful/energetic, choose a colorful scheme\n           - if it implies monochrome/minimal, choose a black–white/neutral scheme\n\n**Component Reuse:**\n\t- Prioritize using pre-existing components from src/components/ui when applicable\n\t- Create new components that match the style and conventions of existing components when needed\n\t- Examine existing components to understand the project's component patterns before creating new ones\n\n**IMPORTANT**: Do not use HTML based component like dropdown, calendar, toast etc. You **MUST** always use `/app/frontend/src/components/ui/ ` only as a primary components as these are modern and stylish component\n\n**Best Practices:**\n\t- Use Shadcn/UI as the primary component library for consistency and accessibility\n\t- Import path: ./components/[component-name]\n\n**Export Conventions:**\n\t- Components MUST use named exports (export const ComponentName = ...)\n\t- Pages MUST use default exports (export default function PageName() {...})\n\n**Toasts:**\n  - Use `sonner` for toasts\"\n  - Sonner component are located in `/app/src/components/ui/sonner.tsx`\n\nUse 2–4 color gradients, subtle textures/noise overlays, or CSS-based noise to avoid flat visuals."
 }
-
-
-<General UI UX Design Guidelines>  
-    - You must **not** apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms
-    - You must **not** center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text
-   - NEVER: use AI assistant Emoji characters like`🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons. Always use **FontAwesome cdn** or **lucid-react** library already installed in the package.json
-
- **GRADIENT RESTRICTION RULE**
-NEVER use dark/saturated gradient combos (e.g., purple/pink) on any UI element.  Prohibited gradients: blue-500 to purple 600, purple 500 to pink-500, green-500 to blue-500, red to pink etc
-NEVER use dark gradients for logo, testimonial, footer etc
-NEVER let gradients cover more than 20% of the viewport.
-NEVER apply gradients to text-heavy content or reading areas.
-NEVER use gradients on small UI elements (<100px width).
-NEVER stack multiple gradient layers in the same viewport.
-
-**ENFORCEMENT RULE:**
-    • Id gradient area exceeds 20% of viewport OR affects readability, **THEN** use solid colors
-
-**How and where to use:**
-   • Section backgrounds (not content backgrounds)
-   • Hero section header content. Eg: dark to light to dark color
-   • Decorative overlays and accent elements only
-   • Hero section with 2-3 mild color
-   • Gradients creation can be done for any angle say horizontal, vertical or diagonal
-
-- For AI chat, voice application, **do not use purple color. Use color like light green, ocean blue, peach orange etc**
-
-</Font Guidelines>
-
-- Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead. 
-   
-- Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.
-
-- Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.
-   
-- Before generating UI, infer the visual style from the problem statement (palette, contrast, mood, motion) and immediately instantiate it by setting global design tokens (primary, secondary/accent, background, foreground, ring, state colors), rather than relying on any library defaults. Don't make the background dark as a default step, always understand problem first and define colors accordingly
-    Eg: - if it implies playful/energetic, choose a colorful scheme
-           - if it implies monochrome/minimal, choose a black–white/neutral scheme
-
-**Component Reuse:**
-	- Prioritize using pre-existing components from src/components/ui when applicable
-	- Create new components that match the style and conventions of existing components when needed
-	- Examine existing components to understand the project's component patterns before creating new ones
-
-**IMPORTANT**: Do not use HTML based component like dropdown, calendar, toast etc. You **MUST** always use `/app/frontend/src/components/ui/ ` only as a primary components as these are modern and stylish component
-
-**Best Practices:**
-	- Use Shadcn/UI as the primary component library for consistency and accessibility
-	- Import path: ./components/[component-name]
-
-**Export Conventions:**
-	- Components MUST use named exports (export const ComponentName = ...)
-	- Pages MUST use default exports (export default function PageName() {...})
-
-**Toasts:**
-  - Use `sonner` for toasts"
-  - Sonner component are located in `/app/src/components/ui/sonner.tsx`
-
-Use 2–4 color gradients, subtle textures/noise overlays, or CSS-based noise to avoid flat visuals.
-</General UI UX Design Guidelines>

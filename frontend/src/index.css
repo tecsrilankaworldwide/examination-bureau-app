@@ -68,6 +68,13 @@ code {
   letter-spacing: 0.025em;
 }
 
+/* Tamil Typography */
+.font-tamil {
+  font-family: 'Noto Sans Tamil', 'Lohit Tamil', 'TSCu_Times', sans-serif;
+  line-height: 1.75;
+  letter-spacing: 0.025em;
+}
+
 /* Utility Classes */
 .text-primary {
   color: hsl(var(--primary));

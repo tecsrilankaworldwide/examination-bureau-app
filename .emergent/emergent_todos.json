@@ -1,6 +1,10 @@
 [
   {
     "content": "Phase 1: Test core workflows with Testing Agent",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 2: Get design guidelines for remaining features",
     "status": "in_progress"
   }
 ]

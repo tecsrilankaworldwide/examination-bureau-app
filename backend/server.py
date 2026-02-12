@@ -667,11 +667,36 @@ async def list_paper2_submissions(
     return enriched
 
 
+@api_router.get("/teacher/paper2/submissions/{submission_id}")
+async def get_submission_detail(
+    submission_id: str,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Get detailed Paper 2 submission for marking"""
+    if current_user["role"] != UserRole.TEACHER:
+        raise HTTPException(status_code=403, detail="Only teachers can access this")
+    
+    submission = await db.paper2_submissions.find_one({"id": submission_id})
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    student = await db.users.find_one({"id": submission["student_id"]})
+    exam = await db.exams.find_one({"id": submission["exam_id"]})
+    
+    return {
+        **serialize_doc(submission),
+        "student_name": student["name"] if student else "Unknown",
+        "student_grade": student.get("grade") if student else None,
+        "exam_title": exam["title"] if exam else "Unknown"
+    }
+
+
 @api_router.put("/teacher/paper2/submissions/{submission_id}/score")
 async def score_paper2_submission(
     submission_id: str,
     skill_scores: Dict[str, int],
     feedback: str = "",
+    status: str = "draft",
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """Score a Paper 2 submission"""
@@ -685,19 +710,19 @@ async def score_paper2_submission(
     # Calculate total score
     total_score = sum(skill_scores.values())
     
+    update_data = {
+        "skill_scores": skill_scores,
+        "score": total_score,
+        "feedback": feedback,
+        "status": status if status in ["draft", "scored"] else "draft",
+        "scored_by": current_user["id"],
+        "scored_at": datetime.now(timezone.utc)
+    }
+    
     # Update submission
     await db.paper2_submissions.update_one(
         {"id": submission_id},
-        {
-            "$set": {
-                "skill_scores": skill_scores,
-                "score": total_score,
-                "feedback": feedback,
-                "status": "scored",
-                "scored_by": current_user["id"],
-                "scored_at": datetime.now(timezone.utc)
-            }
-        }
+        {"$set": update_data}
     )
     
     return {"message": "Submission scored successfully", "total_score": total_score}

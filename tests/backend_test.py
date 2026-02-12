@@ -466,6 +466,14 @@ def main():
     print("TEACHER TESTS")
     print("="*60)
     tester.test_teacher_submissions()
+    tester.test_teacher_submissions_filter_grade()
+    tester.test_teacher_submissions_filter_status()
+    
+    # 6b. Paper 2 Tests
+    print("\n" + "="*60)
+    print("PAPER 2 TESTS")
+    print("="*60)
+    tester.test_get_paper2_submission()
     
     # 7. Parent Tests
     print("\n" + "="*60)

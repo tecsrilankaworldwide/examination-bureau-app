@@ -1,5 +1,5 @@
 :root {
-  /* Brand Colors */
+  /* Brand Colors - Sri Lankan Flag Theme */
   --background: 210 20% 98%;
   --foreground: 224 71% 8%;
   --muted: 210 16% 94%;
@@ -7,17 +7,24 @@
   --card: 0 0% 100%;
   --card-foreground: 224 71% 8%;
   
-  --primary: 215 47% 18%;
+  /* Primary - Maroon */
+  --primary: 338 74% 32%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 209 42% 32%;
+  /* Secondary - Green */
+  --secondary: 148 79% 27%;
   --secondary-foreground: 0 0% 100%;
   
-  --accent: 44 62% 46%;
-  --accent-foreground: 215 47% 18%;
+  /* Accent - Saffron/Orange */
+  --accent: 32 100% 45%;
+  --accent-foreground: 224 71% 8%;
   
+  /* Gold */
+  --gold: 47 88% 58%;
+  
+  /* Status Colors */
   --info: 184 64% 33%;
-  --success: 142 38% 36%;
+  --success: 142 60% 32%;
   --warning: 32 95% 44%;
   --destructive: 0 72% 45%;
   --ring: 210 20% 40%;

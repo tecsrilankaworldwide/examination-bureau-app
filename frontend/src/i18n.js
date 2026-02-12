@@ -135,6 +135,73 @@ const resources = {
       'error': 'දෝෂයකි',
       'success': 'සාර්ථකයි'
     }
+  },
+  ta: {
+    translation: {
+      // Auth
+      'sign_in': 'உள்நுழைக',
+      'email': 'மின்னஞ்சல் முகவரி',
+      'password': 'கடவுச்சொல்',
+      'quick_login': 'விரைவு உள்நுழைவு (சோதனைக்கு)',
+      'logout': 'வெளியேறு',
+      
+      // Dashboard
+      'welcome': 'வரவேற்பு',
+      'dashboard': 'கட்டுப்பாட்டு பலகை',
+      'my_exams': 'எனது தேர்வுகள்',
+      'progress_report': 'முன்னேற்ற அறிக்கை',
+      'view_progress': 'முன்னேற்றத்தைக் காண்க',
+      'start_exam': 'தேர்வைத் தொடங்கு',
+      'resume_exam': 'தேர்வைத் தொடரவும்',
+      'completed': 'முடிந்தது',
+      'in_progress': 'நடைபெறுகிறது',
+      
+      // Paper 2
+      'paper2_submission': 'தாள் 2 சமர்ப்பிப்பு',
+      'upload_answer_sheets': 'பதில் தாள்களைப் பதிவேற்றவும்',
+      'drag_drop': 'பதில் தாள் புகைப்படங்களை இங்கே இழுத்து விடவும்',
+      'or_click_select': 'அல்லது கோப்புகளைத் தேர்ந்தெடுக்க கிளிக் செய்க',
+      'supported_formats': 'ஆதரிக்கப்படுபவை: PNG, JPG, JPEG, WEBP',
+      'selected_files': 'தேர்ந்தெடுக்கப்பட்ட கோப்புகள்',
+      'upload': 'பதிவேற்று',
+      'uploading': 'பதிவேற்றுகிறது...',
+      'submission_received': 'சமர்ப்பிப்பு பெறப்பட்டது',
+      'under_review': 'உங்கள் தாள் 2 சமர்ப்பிக்கப்பட்டது மற்றும் மதிப்பாய்வு செய்யப்படுகிறது',
+      'no_submission': 'இன்னும் சமர்ப்பிப்பு இல்லை',
+      'submit': 'சமர்ப்பிக்கவும்',
+      
+      // Teacher
+      'submissions': 'சமர்ப்பிப்புகள்',
+      'filter_by_grade': 'வகுப்பின்படி வடிகட்டு',
+      'filter_by_status': 'நிலையின்படி வடிகட்டு',
+      'all_grades': 'அனைத்து வகுப்புகள்',
+      'all_statuses': 'அனைத்து நிலைகள்',
+      'student_name': 'மாணவர் பெயர்',
+      'grade': 'வகுப்பு',
+      'submitted_at': 'சமர்ப்பித்த நேரம்',
+      'status': 'நிலை',
+      'actions': 'செயல்கள்',
+      'mark': 'மதிப்பெண்',
+      'save_draft': 'வரைவைச் சேமிக்கவும்',
+      'finalize': 'இறுதி செய்யவும்',
+      'comments': 'கருத்துகள்',
+      'total_score': 'மொத்த மதிப்பெண்',
+      
+      // Progress
+      'skill_analysis': 'திறன் பகுப்பாய்வு',
+      'monthly_progress': 'மாதாந்திர முன்னேற்றம்',
+      'export_pdf': 'PDF ஏற்றுமதி',
+      'average_score': 'சராசரி மதிப்பெண்',
+      
+      // Common
+      'back': 'பின்செல்',
+      'close': 'மூடு',
+      'remove': 'அகற்று',
+      'browse': 'உலாவு',
+      'loading': 'ஏற்றுகிறது...',
+      'error': 'பிழை',
+      'success': 'வெற்றி'
+    }
   }
 };
 

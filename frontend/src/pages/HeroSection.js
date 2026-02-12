@@ -49,10 +49,10 @@ const HeroSection = () => {
               <span className="text-2xl">🇱🇰</span>
               <div>
                 <h1 className="text-lg font-bold" style={{ color: '#8D153A' }}>
-                  {isSinhala ? 'පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව' : 'Examination Evaluation Bureau'}
+                  {isSinhala ? 'පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව' : isTamil ? 'தேர்வு மதிப்பீட்டு பணியகம்' : 'Examination Evaluation Bureau'}
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  {isSinhala ? 'ඉංග්‍රීසියන් ඇසුරුවදින්' : 'Building the Nation\'s New Generation'}
+                  {isSinhala ? 'ඉංග්‍රීසියන් ඇසුරුවදින්' : isTamil ? 'தேசத்தின் புதிய தலைமுறையை உருவாக்குதல்' : 'Building the Nation\'s New Generation'}
                 </p>
               </div>
             </div>
@@ -92,17 +92,24 @@ const HeroSection = () => {
                     ශ්‍රී ලංකා ශිෂ්‍යත්ව විභාග
                   </span>
                 )}
+                {isTamil && (
+                  <span className="font-tamil block mb-2" style={{ color: '#8D153A', lineHeight: 1.75 }}>
+                    இலங்கை புலமைப்பரிசில் தேர்வுகள்
+                  </span>
+                )}
                 <span style={{ color: '#137B10' }}>
                   Sri Lanka Scholarship Exams
                 </span>
                 <span className="block mt-2" style={{ color: '#E68100' }}>
-                  {isSinhala ? 'ඇගයීම පොර්ටලය' : 'Evaluation Portal'}
+                  {isSinhala ? 'ඇගයීම පොර්ටලය' : isTamil ? 'மதிப்பீட்டு நுழைவாயில்' : 'Evaluation Portal'}
                 </span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground">
                 {isSinhala
                   ? 'ශ්‍රේණි 2-5 ශිෂ්‍යයන් සඳහා සමුල්ල විභාග පද්ධතියක් සහ ලඛු ප්‍රගති පිළිබංදීමක්'
+                  : isTamil
+                  ? 'வகுப்பு 2-5 மாணவர்களுக்கு முழுமையான தேர்வு முறை மற்றும் உடனடி முன்னேற்ற கண்காணிப்பு'
                   : 'Comprehensive exam system with instant results and progress tracking for Grades 2-5 students'}
               </p>
               

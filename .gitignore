@@ -42,3 +42,4 @@ htmlcov/
 # OS
 Thumbs.db
 frontend/node_modules/.cache/default-development/8.pack
+frontend/node_modules/.cache/default-development/5.pack

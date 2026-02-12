@@ -254,7 +254,7 @@ const HeroSection = () => {
                 ? 'ස්‍රී ලංකා පරීක්ෂණ ඇගයීම කිරීම් බ්‍යුරෝව'
                 : 'Sri Lanka Examination Evaluation Bureau'}
             </p>
-            <p className="mt-2">© 2026 {isS inhala ? 'සියළු හක්කම් සුරක්ෂිතයි' : 'All rights reserved'}</p>
+            <p className="mt-2">© 2026 {isSinhala ? 'සියළු හක්කම් සුරක්ෂිතයි' : 'All rights reserved'}</p>
           </div>
         </div>
       </footer>

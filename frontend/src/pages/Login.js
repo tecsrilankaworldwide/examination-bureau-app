@@ -131,8 +131,14 @@ const Login = () => {
             </div>
           </div>
           
-          {/* Footer note */}
-          <div className="text-center mt-6">
+          {/* Registration Link */}
+          <div className="text-center mt-6 space-y-2">
+            <p className="text-sm text-gray-600">
+              New student? 
+              <a href="/register" className="text-orange-500 hover:text-orange-600 font-medium ml-1">
+                Register here / ලියාපදිංචි වන්න
+              </a>
+            </p>
             <p className="text-sm text-[#6B7280]">{t('app.copyright')}</p>
           </div>
         </div>

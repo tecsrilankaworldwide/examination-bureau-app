@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import axios from 'axios';
 import './App.css';
 
 // Auth Context
@@ -8,15 +7,15 @@ import { AuthProvider, useAuth } from './AuthContext';
 
 // Pages
 import Login from './pages/Login';
+import Register from './pages/Register';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import ParentDashboard from './pages/ParentDashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import TypesetterDashboard from './pages/TypesetterDashboard';
+import MarkerDashboard from './pages/MarkerDashboard';
 import ExamInterface from './pages/ExamInterface';
+import ParentUpload from './pages/ParentUpload';
 import ProgressReport from './pages/ProgressReport';
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -37,9 +36,10 @@ function AppContent() {
   const { user } = useAuth();
   
   return (
-    <div className="min-h-screen" style={{background: '#FFFBF0'}}>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         
         <Route 
           path="/dashboard" 
@@ -48,7 +48,7 @@ function AppContent() {
               {user?.role === 'student' && <StudentDashboard />}
               {user?.role === 'parent' && <ParentDashboard />}
               {user?.role === 'teacher' && <TeacherDashboard />}
-              {user?.role === 'typesetter' && <TypesetterDashboard />}
+              {user?.role === 'marker' && <MarkerDashboard />}
               {user?.role === 'admin' && <AdminDashboard />}
             </ProtectedRoute>
           } 
@@ -64,9 +64,27 @@ function AppContent() {
         />
         
         <Route 
+          path="/parent/upload" 
+          element={
+            <ProtectedRoute allowedRoles={['parent']}>
+              <ParentUpload />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/marker" 
+          element={
+            <ProtectedRoute allowedRoles={['marker', 'teacher', 'admin']}>
+              <MarkerDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
           path="/progress/:studentId" 
           element={
-            <ProtectedRoute allowedRoles={['parent', 'teacher', 'admin']}>
+            <ProtectedRoute allowedRoles={['parent', 'teacher', 'admin', 'student']}>
               <ProgressReport />
             </ProtectedRoute>
           } 

@@ -1,177 +1,234 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAuth, API } from '../AuthContext';
 import axios from 'axios';
-import { BookOpen, Clock, Award, TrendingUp, LogOut, FileText } from 'lucide-react';
-import AcademicLogo from '../components/AcademicLogo';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useAuth } from '../AuthContext';
+import { useTranslation } from 'react-i18next';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const StudentDashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
+  
   const [exams, setExams] = useState([]);
-  const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    const fetchExams = async () => {
+      try {
+        const response = await axios.get(`${API}/exams`, {
+          params: { grade: user?.grade, status: 'published' }
+        });
+        setExams(response.data.exams || []);
+      } catch (err) {
+        setError('Failed to load exams');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadDashboardData = async () => {
-    try {
-      const examsRes = await axios.get(`${API}/exams?grade=${user.grade}&status=published`);
-      setExams(examsRes.data.exams || []);
-      setAttempts([]);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to load dashboard:', error);
-      setLoading(false);
+    if (user?.grade) {
+      fetchExams();
     }
+  }, [user, token]);
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
   };
 
-  const getGradeDisplay = (grade) => {
-    const gradeKey = grade?.replace('grade_', 'grade');
-    return t(`common.${gradeKey}`) || grade;
+  const getGradeLabel = (grade) => {
+    const labels = {
+      'grade_2': { en: 'Grade 2', si: '2 ශ්‍රේණිය', ta: 'தரம் 2' },
+      'grade_3': { en: 'Grade 3', si: '3 ශ්‍රේණිය', ta: 'தரம் 3' },
+      'grade_4': { en: 'Grade 4', si: '4 ශ්‍රේණිය', ta: 'தரம் 4' },
+      'grade_5': { en: 'Grade 5', si: '5 ශ්‍රේණිය', ta: 'தரம் 5' }
+    };
+    return labels[grade]?.[i18n.language] || labels[grade]?.en || grade;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
-        <div className="text-center">
-          <div className="spinner mb-4"></div>
-          <p className="text-xl font-bold text-[#92400E]">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
-  }
+  const startExam = (examId) => {
+    navigate(`/exam/${examId}`);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       {/* Header */}
-      <div className="bg-white shadow-md border-b-4 border-[#F59E0B]">
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:pl-48 xl:pl-60 py-5">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-[#F59E0B] rounded-lg flex items-center justify-center">
-                <BookOpen className="w-7 h-7 text-white" strokeWidth={2.5} />
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-3xl">📚</span>
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>{t('dashboard.student')}</h1>
-                <p className="text-sm md:text-base text-[#6B7280]">{t('dashboard.welcome')}, <span className="font-semibold text-[#F59E0B]">{user.full_name}</span></p>
+                <h1 className="text-xl font-bold text-gray-800">
+                  {i18n.language === 'si' ? 'ශිෂ්‍ත්‍රවෘත්ති විභාගය' : 
+                   i18n.language === 'ta' ? 'புலமைப்பரிசில் தேர்வு' : 
+                   'Scholarship Exam'}
+                </h1>
+                <p className="text-sm text-gray-500">{getGradeLabel(user?.grade)}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <LanguageSwitcher />
-              <div className="px-4 py-2 bg-[#F59E0B] text-white rounded-lg font-bold">
-                {getGradeDisplay(user.grade)}
+
+            <div className="flex items-center gap-4">
+              {/* Language Switcher */}
+              <div className="flex gap-1 bg-gray-100 rounded-full p-1">
+                <button 
+                  onClick={() => changeLanguage('si')}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    i18n.language === 'si' ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  සිං
+                </button>
+                <button 
+                  onClick={() => changeLanguage('ta')}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    i18n.language === 'ta' ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  த
+                </button>
+                <button 
+                  onClick={() => changeLanguage('en')}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    i18n.language === 'en' ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  EN
+                </button>
               </div>
+
+              <div className="text-right">
+                <p className="font-medium text-gray-800">{user?.full_name}</p>
+                <p className="text-xs text-gray-500">{user?.student_id}</p>
+              </div>
+              
               <button
                 onClick={logout}
-                className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1"
                 data-testid="logout-btn"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden md:inline">{t('auth.logout')}</span>
+                {i18n.language === 'si' ? 'පිටවන්න' : 
+                 i18n.language === 'ta' ? 'வெளியேறு' : 'Logout'}
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:pl-48 xl:pl-60 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#FFF7E5] rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-[#F59E0B]" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>{exams.length}</div>
-                <div className="text-sm font-medium text-[#6B7280]">{t('exam.available')}</div>
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Welcome Card */}
+        <div className="bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl p-6 mb-8 text-white shadow-xl">
+          <h2 className="text-2xl font-bold mb-2">
+            {i18n.language === 'si' ? `ආයුබෝවන් ${user?.full_name}!` :
+             i18n.language === 'ta' ? `வணக்கம் ${user?.full_name}!` :
+             `Welcome, ${user?.full_name}!`}
+          </h2>
+          <p className="opacity-90">
+            {i18n.language === 'si' ? 'ඔබේ මාසික විභාගය සඳහා සුදානම් වන්න' :
+             i18n.language === 'ta' ? 'உங்கள் மாதாந்திர தேர்வுக்கு தயாராகுங்கள்' :
+             'Get ready for your monthly exam'}
+          </p>
+        </div>
+
+        {/* Exam Info Card */}
+        <div className="bg-white rounded-xl p-6 mb-8 shadow-lg border-l-4 border-blue-500">
+          <h3 className="font-bold text-gray-800 mb-3">
+            {i18n.language === 'si' ? 'විභාග ව්‍යුහය' :
+             i18n.language === 'ta' ? 'தேர்வு அமைப்பு' :
+             'Exam Structure'}
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📝</span>
+                <div>
+                  <p className="font-semibold text-blue-800">MCQ Paper</p>
+                  <p className="text-sm text-blue-600">60 Questions • 60 Minutes</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#ECFDF5] rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-[#10B981]" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#10B981]" style={{fontFamily: 'Manrope, sans-serif'}}>{attempts.length}</div>
-                <div className="text-sm font-medium text-[#6B7280]">{t('exam.completed')}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#EFF6FF] rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-[#3B82F6]" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#3B82F6]" style={{fontFamily: 'Manrope, sans-serif'}}>-</div>
-                <div className="text-sm font-medium text-[#6B7280]">{t('exam.avgScore')}</div>
+            <div className="bg-green-50 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">✏️</span>
+                <div>
+                  <p className="font-semibold text-green-800">Written Paper</p>
+                  <p className="text-sm text-green-600">Essay + Short Answers</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Exams Section */}
-        <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border-2 border-[#E5E7EB]">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>
-            {t('exam.availableExams')}
-          </h2>
+        {/* Available Exams */}
+        <h3 className="text-xl font-bold text-gray-800 mb-4">
+          {i18n.language === 'si' ? 'පවතින විභාග' :
+           i18n.language === 'ta' ? 'கிடைக்கும் தேர்வுகள்' :
+           'Available Exams'}
+        </h3>
 
-          {exams.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📚</div>
-              <p className="text-lg text-[#6B7280] font-semibold">{t('progress.noData')}</p>
-              <p className="text-sm text-[#9CA3AF] mt-2">{t('auth.needHelp')}</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {exams.map(exam => (
-                <div
-                  key={exam.id}
-                  className="bg-gradient-to-br from-[#FFF7E5] to-white rounded-xl p-6 border-2 border-[#F5E6B3] hover:shadow-lg transition-all"
-                  data-testid={`exam-card-${exam.id}`}
-                >
-                  <h3 className="text-xl font-bold mb-3 text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>{exam.title}</h3>
-                  
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FCD34D] rounded-full mb-4">
-                    <span className="text-sm font-semibold text-[#92400E]">{t('exam.month')}: {exam.month}</span>
-                  </div>
-                  
-                  <div className="flex gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-[#6B7280]">
-                      <Clock className="w-4 h-4" />
-                      <span>{exam.duration_minutes} {t('exam.minutes')}</span>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error}</div>
+        ) : exams.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center shadow-lg">
+            <span className="text-6xl">📋</span>
+            <h3 className="text-xl font-bold text-gray-800 mt-4">
+              {i18n.language === 'si' ? 'දැනට විභාග නොමැත' :
+               i18n.language === 'ta' ? 'தற்போது தேர்வுகள் இல்லை' :
+               'No Exams Available'}
+            </h3>
+            <p className="text-gray-600 mt-2">
+              {i18n.language === 'si' ? 'නව විභාග සඳහා පසුව පරීක්ෂා කරන්න' :
+               i18n.language === 'ta' ? 'புதிய தேர்வுகளுக்கு பின்னர் சரிபார்க்கவும்' :
+               'Check back later for new exams'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {exams.map(exam => (
+              <div 
+                key={exam.id} 
+                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                data-testid={`exam-card-${exam.id}`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-800">{exam.title}</h4>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                        {getGradeLabel(exam.grade)}
+                      </span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-600">{exam.month}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-[#6B7280]">
-                      <FileText className="w-4 h-4" />
-                      <span>{exam.paper1_questions?.length || 60} {t('exam.questions')}</span>
+                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                      <span>📝 {exam.mcq_total_questions || 60} MCQ</span>
+                      <span>⏱️ {exam.mcq_duration_minutes || 60} min</span>
                     </div>
                   </div>
-
                   <button
-                    onClick={() => navigate(`/exam/${exam.id}`)}
-                    className="w-full py-3 bg-[#F59E0B] text-white font-bold rounded-lg hover:bg-[#D97706] transition-all"
-                    style={{fontFamily: 'Manrope, sans-serif'}}
-                    data-testid={`start-exam-button-${exam.id}`}
+                    onClick={() => startExam(exam.id)}
+                    data-testid={`start-exam-${exam.id}`}
+                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all transform hover:scale-105 shadow-lg"
                   >
-                    {t('exam.startExam')} →
+                    {i18n.language === 'si' ? 'ආරම්භ කරන්න' :
+                     i18n.language === 'ta' ? 'தொடங்கு' :
+                     'Start Exam'}
                   </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 };

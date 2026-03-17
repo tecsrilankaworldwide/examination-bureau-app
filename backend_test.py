@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 class ExamPlatformTester:
-    def __init__(self, base_url="http://localhost:8001"):
+    def __init__(self, base_url="https://app-install-hub-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.tokens = {}  # Store tokens for different user types
         self.tests_run = 0
@@ -18,10 +18,10 @@ class ExamPlatformTester:
         
         # Test credentials from review request
         self.test_users = {
-            "student": {"email": "student@test.com", "password": "student123"},
-            "teacher": {"email": "teacher@test.com", "password": "teacher123"},
-            "parent": {"email": "parent@test.com", "password": "parent123"},
-            "admin": {"email": "admin@test.com", "password": "admin123"}
+            "student": {"email": "student1@test.lk", "password": "student123"},
+            "parent": {"email": "parent1@test.lk", "password": "parent123"},
+            "marker": {"email": "marker@exam.lk", "password": "marker123"},
+            "admin": {"email": "admin@exam.lk", "password": "admin123"}
         }
 
     def log_test(self, name, success, details=""):
@@ -146,12 +146,12 @@ class ExamPlatformTester:
             self.log_test("Start Exam", False, f"Error: {str(e)}")
             return False, None
 
-    def test_student_progress(self, student_id, user_type="student"):
-        """Test getting student progress"""
-        print(f"\n📊 Testing Student Progress ({student_id[:8]}...)...")
+    def test_parent_upload_status(self, student_id, user_type="parent"):
+        """Test parent upload status check"""
+        print(f"\n📤 Testing Parent Upload Status ({student_id})...")
         
         if user_type not in self.tokens:
-            self.log_test("Student Progress", False, f"No token for {user_type}")
+            self.log_test("Parent Upload Status", False, f"No token for {user_type}")
             return False
             
         try:
@@ -160,21 +160,120 @@ class ExamPlatformTester:
                 "Content-Type": "application/json"
             }
             
-            response = requests.get(f"{self.base_url}/api/students/{student_id}/progress", headers=headers)
+            response = requests.get(f"{self.base_url}/api/parent/upload-status/{student_id}", headers=headers)
             success = response.status_code == 200
             
             if success:
                 data = response.json()
-                monthly_progress = data.get("monthly_progress", [])
-                total_exams = data.get("total_exams_taken", 0)
-                details = f"Status: {response.status_code}, Monthly records: {len(monthly_progress)}, Total exams: {total_exams}"
+                upload_available = data.get("upload_available", False)
+                message = data.get("message", "")
+                details = f"Status: {response.status_code}, Upload Available: {upload_available}, Message: {message}"
             else:
                 details = f"Status: {response.status_code}, Error: {response.text}"
                 
-            self.log_test("Student Progress", success, details)
+            self.log_test("Parent Upload Status", success, details)
             return success
         except Exception as e:
-            self.log_test("Student Progress", False, f"Error: {str(e)}")
+            self.log_test("Parent Upload Status", False, f"Error: {str(e)}")
+            return False
+
+    def test_marker_pending_papers(self, user_type="marker"):
+        """Test marker pending papers endpoint"""
+        print(f"\n✏️ Testing Marker Pending Papers...")
+        
+        if user_type not in self.tokens:
+            self.log_test("Marker Pending Papers", False, f"No token for {user_type}")
+            return False
+            
+        try:
+            headers = {
+                "Authorization": f"Bearer {self.tokens[user_type]}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.get(f"{self.base_url}/api/marker/pending-papers", headers=headers)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                papers = data.get("papers", [])
+                details = f"Status: {response.status_code}, Pending Papers: {len(papers)}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+                
+            self.log_test("Marker Pending Papers", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Marker Pending Papers", False, f"Error: {str(e)}")
+            return False
+
+    def test_admin_statistics(self, user_type="admin"):
+        """Test admin statistics endpoint"""
+        print(f"\n📊 Testing Admin Statistics...")
+        
+        if user_type not in self.tokens:
+            self.log_test("Admin Statistics", False, f"No token for {user_type}")
+            return False
+            
+        try:
+            headers = {
+                "Authorization": f"Bearer {self.tokens[user_type]}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.get(f"{self.base_url}/api/admin/statistics", headers=headers)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                total_students = data.get("total_students", 0)
+                total_exams = data.get("total_exams", 0)
+                details = f"Status: {response.status_code}, Students: {total_students}, Exams: {total_exams}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+                
+            self.log_test("Admin Statistics", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Admin Statistics", False, f"Error: {str(e)}")
+            return False
+
+    def test_student_parent_registration(self):
+        """Test student-parent registration"""
+        print(f"\n👨‍👩‍👧 Testing Student-Parent Registration...")
+        
+        # Use unique email with timestamp to avoid conflicts
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        test_data = {
+            "student_name": f"Test Student {timestamp}",
+            "student_email": f"test_student_{timestamp}@test.lk",
+            "student_password": "student123",
+            "parent_name": f"Test Parent {timestamp}",
+            "parent_email": f"test_parent_{timestamp}@test.lk", 
+            "parent_password": "parent123",
+            "grade": "grade_5",
+            "language": "si"
+        }
+        
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/register-student-parent",
+                json=test_data,
+                headers={"Content-Type": "application/json"}
+            )
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                student_id = data.get("student_id", "")
+                details = f"Status: {response.status_code}, Student ID: {student_id}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+                
+            self.log_test("Student-Parent Registration", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Student-Parent Registration", False, f"Error: {str(e)}")
             return False
 
     def run_comprehensive_test(self):
@@ -191,7 +290,7 @@ class ExamPlatformTester:
             
         # Test 2: Login Tests for All User Roles
         login_results = {}
-        for user_type in ["student", "teacher", "parent", "admin"]:
+        for user_type in ["student", "parent", "marker", "admin"]:
             login_results[user_type] = self.test_login(user_type)
         
         # Test 3: Exam Listing for All Grades
@@ -201,7 +300,10 @@ class ExamPlatformTester:
             success, exams = self.test_get_exams_by_grade(grade)
             exam_results[grade] = (success, exams)
         
-        # Test 4: Student-specific tests (if student login successful)
+        # Test 4: Student-Parent Registration
+        self.test_student_parent_registration()
+        
+        # Test 5: Student-specific tests (if student login successful)
         if login_results.get("student"):
             # Try to start an exam if any Grade 5 exams exist
             grade_5_success, grade_5_exams = exam_results.get("grade_5", (False, []))
@@ -211,11 +313,22 @@ class ExamPlatformTester:
                     start_success, attempt_id = self.test_start_exam(exam_id, "student")
             
             # Test student progress
-            self.test_student_progress("student_g5_001", "student")
+            self.test_student_progress("dummy_student_id", "student")
         
-        # Test 5: Parent Progress Tracking (if parent login successful)
+        # Test 6: Parent tests (if parent login successful)
         if login_results.get("parent"):
-            self.test_student_progress("student_g5_001", "parent")
+            # Test parent upload status
+            self.test_parent_upload_status("dummy_student_id", "parent")
+            # Test student progress from parent view
+            self.test_student_progress("dummy_student_id", "parent")
+        
+        # Test 7: Marker tests (if marker login successful)
+        if login_results.get("marker"):
+            self.test_marker_pending_papers("marker")
+        
+        # Test 8: Admin tests (if admin login successful)
+        if login_results.get("admin"):
+            self.test_admin_statistics("admin")
         
         # Final Results
         print("\n" + "=" * 60)

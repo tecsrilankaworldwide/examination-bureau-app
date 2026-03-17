@@ -1,250 +1,255 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useAuth, API } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { TrendingUp, Award, Target, BookOpen, LogOut, Calendar } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
-import AcademicLogo from '../components/AcademicLogo';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useAuth } from '../AuthContext';
+import { useTranslation } from 'react-i18next';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const ParentDashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, token, logout } = useAuth();
-  const [progressData, setProgressData] = useState(null);
+  const navigate = useNavigate();
+  
+  const [uploadStatus, setUploadStatus] = useState(null);
+  const [studentProgress, setStudentProgress] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
+  // Check upload status
   useEffect(() => {
-    loadProgress();
-  }, []);
+    const checkStatus = async () => {
+      try {
+        const response = await axios.get(
+          `${API}/parent/upload-status/${user?.linked_student_id || 'none'}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUploadStatus(response.data);
+      } catch (err) {
+        console.error('Upload status check failed');
+      }
+    };
 
-  const loadProgress = async () => {
-    try {
-      // Assuming linked student ID is stored in user.linked_student_id
-      const studentId = user.linked_student_id || 'student_g5_001'; // Default for demo
-      const response = await axios.get(
-        `${API}/students/${studentId}/progress`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setProgressData(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to load progress:', error);
-      setLoading(false);
-    }
+    checkStatus();
+    const interval = setInterval(checkStatus, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, [user, token]);
+
+  // Fetch student progress
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        if (user?.linked_student_user_id) {
+          const response = await axios.get(
+            `${API}/students/${user.linked_student_user_id}/progress`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setStudentProgress(response.data);
+        }
+      } catch (err) {
+        console.error('Progress fetch failed');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProgress();
+  }, [user, token]);
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#F59E0B] mx-auto mb-4"></div>
-          <p className="text-xl font-bold text-[#92400E]">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Prepare chart data
-  const monthlyChartData = progressData?.monthly_progress?.map(month => ({
-    month: month.month,
-    paper1: month.paper1_score,
-    paper2: month.paper2_score,
-    total: month.total_score
-  })) || [];
-
-  // Prepare skills radar data
-  const latestSkills = progressData?.monthly_progress?.[progressData.monthly_progress.length - 1]?.skill_percentages || {};
-  const radarData = Object.entries(latestSkills).map(([skill, percentage]) => ({
-    skill: t(`skills.${skill}`).substring(0, 12),
-    value: percentage
-  }));
-
-  const strengths = progressData?.strengths || [];
-  const weaknesses = progressData?.weaknesses || [];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow-md border-b-4 border-[#F59E0B]">
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:pl-48 xl:pl-60 py-5">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-[#F59E0B] rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-7 h-7 text-white" strokeWidth={2.5} />
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-3xl">👨‍👩‍👧</span>
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>{t('dashboard.parent')}</h1>
-                <p className="text-sm md:text-base text-[#6B7280]">{t('dashboard.welcome')}, <span className="font-semibold text-[#F59E0B]">{user.full_name}</span></p>
+                <h1 className="text-xl font-bold text-gray-800">
+                  {i18n.language === 'si' ? 'දෙමාපිය පුවරුව' : 
+                   i18n.language === 'ta' ? 'பெற்றோர் டாஷ்போர்டு' : 
+                   'Parent Dashboard'}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {i18n.language === 'si' ? 'ශිෂ්‍යයාගේ ප්‍රගතිය නිරීක්ෂණය කරන්න' :
+                   i18n.language === 'ta' ? 'மாணவர் முன்னேற்றத்தை கண்காணிக்கவும்' :
+                   'Monitor student progress'}
+                </p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <LanguageSwitcher />
+
+            <div className="flex items-center gap-4">
+              {/* Language Switcher */}
+              <div className="flex gap-1 bg-gray-100 rounded-full p-1">
+                <button 
+                  onClick={() => changeLanguage('si')}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    i18n.language === 'si' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  සිං
+                </button>
+                <button 
+                  onClick={() => changeLanguage('ta')}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    i18n.language === 'ta' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  த
+                </button>
+                <button 
+                  onClick={() => changeLanguage('en')}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    i18n.language === 'en' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
+
+              <div className="text-right">
+                <p className="font-medium text-gray-800">{user?.full_name}</p>
+                <p className="text-xs text-gray-500">Parent</p>
+              </div>
+              
               <button
                 onClick={logout}
-                className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1"
                 data-testid="logout-btn"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden md:inline">{t('auth.logout')}</span>
+                {i18n.language === 'si' ? 'පිටවන්න' : 
+                 i18n.language === 'ta' ? 'வெளியேறு' : 'Logout'}
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:pl-48 xl:pl-60 py-8">
-        {!progressData || progressData.total_exams_taken === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-8 md:p-12 text-center border-2 border-[#E5E7EB]">
-            <div className="text-6xl mb-4">📊</div>
-            <h2 className="text-2xl font-bold text-[#1F2937] mb-2" style={{fontFamily: 'Manrope, sans-serif'}}>
-              {t('progress.noData')}
-            </h2>
-            <p className="text-gray-600">{t('progress.noDataDesc')}</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#FFF7E5] rounded-lg flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-[#F59E0B]" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>{progressData.total_exams_taken}</div>
-                    <div className="text-xs font-medium text-[#6B7280]">{t('parent.completedExams')}</div>
-                  </div>
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Upload Alert - Only show when upload is available */}
+        {uploadStatus?.upload_available && (
+          <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl p-6 mb-8 text-white shadow-xl animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">📸</span>
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    {i18n.language === 'si' ? 'ලිඛිත පත්‍රය උඩුගත කරන්න!' :
+                     i18n.language === 'ta' ? 'எழுதப்பட்ட தாளை பதிவேற்றவும்!' :
+                     'Upload Written Paper NOW!'}
+                  </h2>
+                  <p className="opacity-90">
+                    {i18n.language === 'si' ? `ඉතිරි කාලය: ${Math.floor(uploadStatus.remaining_seconds / 60)}:${(uploadStatus.remaining_seconds % 60).toString().padStart(2, '0')}` :
+                     i18n.language === 'ta' ? `மீதமுள்ள நேரம்: ${Math.floor(uploadStatus.remaining_seconds / 60)}:${(uploadStatus.remaining_seconds % 60).toString().padStart(2, '0')}` :
+                     `Time remaining: ${Math.floor(uploadStatus.remaining_seconds / 60)}:${(uploadStatus.remaining_seconds % 60).toString().padStart(2, '0')}`}
+                  </p>
                 </div>
               </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#ECFDF5] rounded-lg flex items-center justify-center">
-                    <Target className="w-6 h-6 text-[#10B981]" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-[#10B981]" style={{fontFamily: 'Manrope, sans-serif'}}>
-                      {progressData.monthly_progress?.length > 0
-                        ? Math.round((progressData.monthly_progress[progressData.monthly_progress.length - 1].total_score / 100) * 100)
-                        : '-'}%
-                    </div>
-                    <div className="text-xs font-medium text-[#6B7280]">{t('parent.avgProgress')}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#EFF6FF] rounded-lg flex items-center justify-center">
-                    <Award className="w-6 h-6 text-[#3B82F6]" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-[#3B82F6]" style={{fontFamily: 'Manrope, sans-serif'}}>{strengths.length}</div>
-                    <div className="text-xs font-medium text-[#6B7280]">{t('progress.strong')}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-md border-2 border-[#E5E7EB]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#FEF2F2] rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-[#EF4444]" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-[#EF4444]" style={{fontFamily: 'Manrope, sans-serif'}}>{weaknesses.length}</div>
-                    <div className="text-xs font-medium text-[#6B7280]">{t('progress.needsImprovement')}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Monthly Progress Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6 border-2 border-[#E5E7EB]">
-              <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>
-                {t('progress.monthlyProgress')}
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="paper1" stroke="#F59E0B" strokeWidth={3} name="Paper 1" />
-                  <Line type="monotone" dataKey="paper2" stroke="#3B82F6" strokeWidth={3} name="Paper 2" />
-                  <Line type="monotone" dataKey="total" stroke="#10B981" strokeWidth={3} name="Total" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Skills Radar */}
-            {radarData.length > 0 && (
-              <div className="bg-white rounded-xl shadow-md p-6 border-2 border-[#E5E7EB]">
-                <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>
-                  {t('progress.currentSnapshot')}
-                </h2>
-                <ResponsiveContainer width="100%" height={400}>
-                  <RadarChart data={radarData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="skill" />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                    <Radar name="Skills" dataKey="value" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.6} />
-                    <Tooltip />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Strengths & Weaknesses */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Strengths */}
-              <div className="bg-white rounded-xl shadow-md p-6 border-2 border-[#E5E7EB]">
-                <h3 className="text-lg font-bold mb-4 text-green-600 flex items-center gap-2" style={{fontFamily: 'Manrope, sans-serif'}}>
-                  <Award className="w-5 h-5" />
-                  {t('progress.strong')} Skills
-                </h3>
-                {strengths.length > 0 ? (
-                  <div className="space-y-3">
-                    {strengths.map(([skill, percentage], idx) => (
-                      <div key={idx} className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-[#374151]">
-                          {t(`skills.${skill}`)}
-                        </span>
-                        <span className="text-lg font-bold text-green-600">{percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No data available yet.</p>
-                )}
-              </div>
-
-              {/* Weaknesses */}
-              <div className="bg-white rounded-xl shadow-md p-6 border-2 border-[#E5E7EB]">
-                <h3 className="text-lg font-bold mb-4 text-red-600 flex items-center gap-2" style={{fontFamily: 'Manrope, sans-serif'}}>
-                  <Target className="w-5 h-5" />
-                  {t('progress.needsImprovement')}
-                </h3>
-                {weaknesses.length > 0 ? (
-                  <div className="space-y-3">
-                    {weaknesses.map(([skill, percentage], idx) => (
-                      <div key={idx} className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-[#374151]">
-                          {t(`skills.${skill}`)}
-                        </span>
-                        <span className="text-lg font-bold text-red-600">{percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No data available yet.</p>
-                )}
-              </div>
+              <button
+                onClick={() => navigate('/parent/upload')}
+                data-testid="upload-now-btn"
+                className="px-8 py-4 bg-white text-red-600 font-bold rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
+              >
+                {i18n.language === 'si' ? 'දැන් උඩුගත කරන්න' :
+                 i18n.language === 'ta' ? 'இப்போது பதிவேற்றவும்' :
+                 'Upload Now'}
+              </button>
             </div>
           </div>
         )}
-      </div>
+
+        {/* Info Cards */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Student Info */}
+          <div className="bg-white rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="text-xl">👨‍🎓</span>
+              {i18n.language === 'si' ? 'ශිෂ්‍යයා' :
+               i18n.language === 'ta' ? 'மாணவர்' :
+               'Student'}
+            </h3>
+            <div className="space-y-3">
+              <p className="text-gray-600">
+                <span className="text-gray-400">ID:</span> {user?.linked_student_id || 'N/A'}
+              </p>
+            </div>
+          </div>
+
+          {/* Upload Instructions */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 className="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
+              <span className="text-xl">ℹ️</span>
+              {i18n.language === 'si' ? 'උඩුගත කිරීමේ උපදෙස්' :
+               i18n.language === 'ta' ? 'பதிவேற்ற வழிமுறைகள்' :
+               'Upload Instructions'}
+            </h3>
+            <ul className="space-y-2 text-sm text-blue-700">
+              <li>• {i18n.language === 'si' ? 'ශිෂ්‍යයා ලිඛිත පත්‍රය සම්පූර්ණ කළ පසු' :
+                      i18n.language === 'ta' ? 'மாணவர் எழுத்துத் தாளை முடித்த பிறகு' :
+                      'After student completes written paper'}</li>
+              <li>• {i18n.language === 'si' ? 'ඡායාරූප උඩුගත කිරීමට විනාඩි 5ක් පමණි' :
+                      i18n.language === 'ta' ? 'புகைப்படங்களை பதிவேற்ற 5 நிமிடங்கள் மட்டுமே' :
+                      'Only 5 minutes to upload photos'}</li>
+              <li>• {i18n.language === 'si' ? 'සියලුම පිටු පැහැදිලිව ඡායාරූප ගන්න' :
+                      i18n.language === 'ta' ? 'அனைத்து பக்கங்களையும் தெளிவாக புகைப்படம் எடுக்கவும்' :
+                      'Take clear photos of all pages'}</li>
+              <li>• {i18n.language === 'si' ? 'උපරිම ඡායාරූප 15' :
+                      i18n.language === 'ta' ? 'அதிகபட்சம் 15 புகைப்படங்கள்' :
+                      'Maximum 15 photos'}</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Progress Section */}
+        <div className="bg-white rounded-xl p-6 shadow-lg">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">
+            {i18n.language === 'si' ? 'විභාග ප්‍රතිඵල' :
+             i18n.language === 'ta' ? 'தேர்வு முடிவுகள்' :
+             'Exam Results'}
+          </h3>
+
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            </div>
+          ) : studentProgress?.results?.length > 0 ? (
+            <div className="space-y-4">
+              {studentProgress.results.map((result, index) => (
+                <div key={index} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="font-medium text-gray-800">{result.exam?.title}</h4>
+                      <p className="text-sm text-gray-500">{result.exam?.month}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-blue-600">{result.total_score}</p>
+                      <p className="text-xs text-gray-500">
+                        MCQ: {result.mcq_score} | Written: {result.written_score}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <span className="text-5xl">📊</span>
+              <p className="text-gray-500 mt-4">
+                {i18n.language === 'si' ? 'තවම ප්‍රතිඵල නොමැත' :
+                 i18n.language === 'ta' ? 'இன்னும் முடிவுகள் இல்லை' :
+                 'No results yet'}
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

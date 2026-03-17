@@ -1,100 +1,139 @@
-# Grade 5 Scholarship Examination Platform - PRD
+# Grade 5 Scholarship Examination Platform - PRD v2.0
 
 ## Original Problem Statement
-User had a Grade 5 Scholarship Exam preparation platform that was mixed with another app (TecaiKids Educational Platform). The original features were:
+User wanted to restore Grade 5 Scholarship Exam platform that was mixed with another app. The platform should support:
 - Grade 2, 3, 4, 5 monthly exam papers
 - Sinhala, Tamil, English medium support
 - Monthly marks recording & comparison reports
-- Progress tracking across months
-- User Roles: Student, Teacher, Parent, Admin
-
-Task was to identify what's mixed up and restore the original functionality.
+- **Complete Exam Flow:**
+  - MCQ: 60 questions, 60 minutes, auto-graded
+  - Written: 1 Essay + 5-15 short questions (by grade)
+  - Parent uploads photos of written paper (5-minute window only)
+  - Anonymous marking with secret codes
+  - Marker payment tracking
 
 ## User Personas
-1. **Students (Grade 2-5)**: Take monthly exams, view results, track progress
-2. **Teachers**: Create exams, grade Paper 2, view student performance
-3. **Parents**: Monitor child's progress, view monthly comparison reports
-4. **Admins**: Manage users, system settings, platform branding
-5. **Typesetters**: Create PDF-based exams, upload in multiple languages
+1. **Students (Grade 2-5)**: Take MCQ exam → Complete written paper → Wait for results
+2. **Parents**: Upload photos of child's written paper within 5 minutes after exam
+3. **Markers/Teachers**: Mark papers anonymously (see only secret code, no student name)
+4. **Admin**: Manage users, exams, system settings
 
 ## Core Requirements (Static)
-- Multi-language support (Sinhala default, Tamil, English)
-- MCQ Exam System (60 questions, 60 minutes, auto-grading)
-- Paper 2 Manual Marking System
-- 10 Skill Areas Tracking
-- Monthly Progress Reports with Comparison
-- Role-based Access Control
-- PDF Exam Support
+
+### Exam Flow
+1. Student logs in → Sees available exams
+2. Student starts exam → MCQ section (60 questions, 60 min timer)
+3. Student submits MCQ → Auto-graded by system
+4. Student completes written section → Submits
+5. Parent upload window opens IMMEDIATELY after student finishes
+6. Parent has exactly 5 MINUTES to upload photos of written paper
+7. Window closes automatically after 5 minutes
+8. Papers go to marking queue with SECRET CODE only
+9. Markers see only: secret code + paper photos (NO student name)
+10. One marker per paper → Marks submitted → Payment recorded
+
+### Anonymous Marking System
+- Secret code format: `EXM-2026-XXXXXX` (auto-generated)
+- Only computer knows the mapping between student and secret code
+- Teachers NEVER see student identity during marking
+- Payment tracked per paper marked
+
+### Multi-Language Support
+- Sinhala (primary)
+- Tamil
+- English
 
 ## What's Been Implemented
 ### Date: 2026-01-17
 
-**Cleanup Completed:**
-- Removed mixed TecaiKids files:
-  - gamification_service.py
-  - challenges_service.py
-  - ai_chat_service.py
-  - paypal_service.py
-  - whatsapp_service.py
-  - country_config.py
-  - age_gamification.py
-  - certificate_service.py
-  - quiz_service.py
-  - reminder_service.py
-  - weekly_quotes.py
-  - parent_guide_translations.py
-  - EnrollmentPayment.js (frontend)
+**Backend (server.py - v2.0):**
+- ✅ Student-Parent registration API
+- ✅ MCQ auto-grading system
+- ✅ Written paper submission flow
+- ✅ Parent upload with 5-minute window
+- ✅ Anonymous marking with secret codes
+- ✅ Marker payment tracking
+- ✅ Admin statistics dashboard
+- ✅ MongoDB Atlas integration
 
-**Verified Working:**
-- Backend API on localhost:8001 (all endpoints working)
-- MongoDB with sample data (users for all grades, sample exams)
-- Authentication (JWT-based login for all roles)
-- Exam listing by grade and status
-- Exam attempt creation and submission
-- Auto-grading with skill area tracking
-- Student progress tracking
-- Paper 2 marking system
-- PDF exam upload system
-- Email notification system
-- Excel/PDF export reports
-- Branding customization
+**Frontend Pages:**
+- ✅ Login.js - With registration link
+- ✅ Register.js - Student + Parent combined registration
+- ✅ StudentDashboard.js - View/start exams
+- ✅ ParentDashboard.js - Upload alert & progress view
+- ✅ ParentUpload.js - 5-minute countdown upload interface
+- ✅ MarkerDashboard.js - Anonymous paper marking
+- ✅ App.js - All routes configured
 
 **Test Accounts:**
-- Student: student@test.com / student123 (Grade 5)
-- Student4: student4@test.com / student123 (Grade 4)
-- Student3: student3@test.com / student123 (Grade 3)
-- Student2: student2@test.com / student123 (Grade 2)
-- Teacher: teacher@test.com / teacher123
-- Parent: parent@test.com / parent123
-- Admin: admin@test.com / admin123
+- Admin: admin@exam.lk / admin123
+- Marker: marker@exam.lk / marker123
+- Test Student: student1@test.lk / student123
+- Test Parent: parent1@test.lk / parent123
 
 ## Known Issues
-- External URL routing (https://app-install-hub-1.preview.emergentagent.com/api/) returns 404
-- This is a platform infrastructure issue, not a code issue
-- Backend works correctly on localhost:8001
+1. **External URL Routing (Platform Issue)**
+   - Backend works perfectly on localhost:8001
+   - External URL (https://...preview.emergentagent.com/api/) returns 404
+   - This is a Kubernetes/platform routing configuration issue
+   - Not fixable in code - requires platform infrastructure support
 
 ## Tech Stack
-- **Backend**: FastAPI (Python 3.11) + MongoDB
+- **Backend**: FastAPI (Python 3.11) + MongoDB Atlas
 - **Frontend**: React 18 + Tailwind CSS + i18next
-- **Database**: MongoDB (local or Atlas)
+- **Database**: MongoDB Atlas (cluster0.0cisjyt.mongodb.net)
+- **Auth**: JWT tokens
+
+## API Endpoints (v2.0)
+
+### Authentication
+- `POST /api/login` - User login
+- `POST /api/register` - Single user registration
+- `POST /api/register-student-parent` - Student + Parent registration
+
+### Exam Management
+- `GET /api/exams` - List exams
+- `POST /api/exams/create` - Create exam (admin)
+- `PUT /api/exams/{id}/publish` - Publish exam
+
+### Student Flow
+- `POST /api/exams/{id}/start` - Start exam
+- `POST /api/attempts/{id}/save-mcq` - Auto-save MCQ answer
+- `POST /api/attempts/{id}/submit-mcq` - Submit MCQ
+- `POST /api/attempts/{id}/submit-written` - Submit written
+
+### Parent Flow
+- `GET /api/parent/upload-status/{student_id}` - Check upload window
+- `POST /api/parent/upload-photos` - Upload paper photos
+
+### Marker Flow
+- `GET /api/marker/pending-papers` - Get papers to mark (anonymous)
+- `POST /api/marker/claim-paper/{id}` - Claim paper
+- `POST /api/marker/submit-marks/{id}` - Submit marks
+- `GET /api/marker/my-payments` - View payment history
+
+### Admin
+- `GET /api/admin/statistics` - Dashboard stats
+- `GET /api/admin/users` - List all users
 
 ## Next Tasks (Backlog)
+
 ### P0 - Critical
-- [ ] Resolve external URL routing issue (platform level)
+- [ ] Desktop App (.exe) build for academic staff
+- [ ] Resolve external URL routing (platform support)
 
 ### P1 - High Priority
-- [ ] Verify frontend login flow once API routing fixed
-- [ ] Test student exam taking flow end-to-end
-- [ ] Test parent progress viewing
-- [ ] Test teacher exam creation
+- [ ] Create sample exams with MCQ questions
+- [ ] Test complete exam flow end-to-end
+- [ ] Implement ExamInterface page (MCQ + Written sections)
 
 ### P2 - Medium Priority
-- [ ] Add more sample exam questions
-- [ ] Enhance monthly comparison charts
-- [ ] Add export to parent WhatsApp feature
+- [ ] Monthly progress comparison charts
+- [ ] Export results to PDF/Excel
+- [ ] Email notifications
 
 ### Future Enhancements
 - [ ] Mobile app version
-- [ ] Real-time exam monitoring for teachers
-- [ ] AI-powered exam question generation
-- [ ] Parent notification system (email/SMS)
+- [ ] Real-time exam monitoring
+- [ ] AI-powered question generation
+- [ ] WhatsApp notifications for parents

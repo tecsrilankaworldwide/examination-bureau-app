@@ -336,6 +336,46 @@ async def login(login_data: UserLogin):
     if not user_doc.get("is_active", True):
         raise HTTPException(status_code=403, detail="Account inactive")
     
+    # PARENT LOGIN CHECK: Only allow if student has completed written section
+    if user_doc.get("role") == "parent":
+        linked_student_id = user_doc.get("linked_student_user_id")
+        if linked_student_id:
+            # Check if student has any active exam attempt waiting for parent upload
+            active_attempt = await db.attempts.find_one({
+                "student_id": linked_student_id,
+                "status": "waiting_parent_upload"
+            })
+            
+            # Check if student is still taking exam
+            in_progress = await db.attempts.find_one({
+                "student_id": linked_student_id,
+                "status": {"$in": ["mcq_in_progress", "written_in_progress"]}
+            })
+            
+            if in_progress:
+                raise HTTPException(
+                    status_code=403, 
+                    detail="Student is still taking the exam. Please wait until the student completes both MCQ and Written sections."
+                )
+            
+            # Add upload status to response
+            if active_attempt:
+                now = datetime.now(timezone.utc)
+                window_end = active_attempt.get("parent_upload_window_end")
+                if isinstance(window_end, str):
+                    window_end = datetime.fromisoformat(window_end.replace('Z', '+00:00'))
+                elif window_end and window_end.tzinfo is None:
+                    window_end = window_end.replace(tzinfo=timezone.utc)
+                
+                if window_end and now > window_end:
+                    # Window expired
+                    user_doc["upload_window_status"] = "expired"
+                else:
+                    remaining = (window_end - now).total_seconds() if window_end else 0
+                    user_doc["upload_window_status"] = "open"
+                    user_doc["upload_remaining_seconds"] = max(0, remaining)
+                    user_doc["attempt_id"] = active_attempt.get("id")
+    
     access_token = create_access_token({"sub": user_doc["id"]})
     
     user_doc.pop("_id", None)
@@ -984,6 +1024,49 @@ async def startup_event():
                 "is_active": True
             })
             logger.info("Created marker user: marker@exam.lk")
+        
+        # Seed sample exam with MCQ questions
+        existing_exam = await db.exams.find_one({"title": "January 2026 - Grade 5 Practice Exam"})
+        if not existing_exam:
+            sample_mcq_questions = []
+            for i in range(1, 61):  # 60 questions
+                sample_mcq_questions.append({
+                    "id": f"q{i}",
+                    "question_number": i,
+                    "question_text": f"Sample question {i}: What is {i} + {i}?",
+                    "text": f"Sample question {i}: What is {i} + {i}?",
+                    "options": [
+                        {"option_id": "A", "text": str(i * 2)},
+                        {"option_id": "B", "text": str(i * 2 + 1)},
+                        {"option_id": "C", "text": str(i * 2 - 1)},
+                        {"option_id": "D", "text": str(i * 3)}
+                    ],
+                    "correct_option_id": "A",
+                    "skill_area": "mathematical_reasoning"
+                })
+            
+            await db.exams.insert_one({
+                "id": str(uuid.uuid4()),
+                "title": "January 2026 - Grade 5 Practice Exam",
+                "grade": "grade_5",
+                "month": "January 2026",
+                "mcq_questions": sample_mcq_questions,
+                "mcq_total_questions": 60,
+                "mcq_duration_minutes": 60,
+                "written_essay_prompt": "Write about your favorite school activity in 3-4 paragraphs.",
+                "written_short_questions": [
+                    "What is the capital of Sri Lanka?",
+                    "Name three rivers in Sri Lanka.",
+                    "What is 25 + 37?",
+                    "What is the largest planet in the solar system?",
+                    "Who is the current president of Sri Lanka?"
+                ],
+                "written_duration_minutes": 45,
+                "status": "published",
+                "created_at": datetime.now(timezone.utc),
+                "is_active": True
+            })
+            logger.info("Created sample exam: January 2026 - Grade 5 Practice Exam")
             
     except Exception as e:
         logger.error(f"Startup error: {e}")

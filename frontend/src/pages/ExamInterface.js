@@ -1,70 +1,86 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth, API } from '../AuthContext';
+import { useAuth } from '../AuthContext';
 import axios from 'axios';
-import { Clock, Flag, CheckCircle, AlertCircle, BookOpen, ArrowLeft, ArrowRight, Save } from 'lucide-react';
-import dayjs from 'dayjs';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const ExamInterface = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { examId } = useParams();
-  const { token, user } = useAuth();
+  const { token, user, logout } = useAuth();
   const navigate = useNavigate();
   
+  // Exam state
   const [exam, setExam] = useState(null);
   const [attempt, setAttempt] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(3600);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [flagged, setFlagged] = useState(new Set());
-  const [saving, setSaving] = useState(false);
-  const saveTimerRef = useRef(null);
+  const [error, setError] = useState('');
+  
+  // MCQ state
+  const [currentSection, setCurrentSection] = useState('mcq'); // 'mcq' or 'written'
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [mcqAnswers, setMcqAnswers] = useState({});
+  const [mcqTimeLeft, setMcqTimeLeft] = useState(3600); // 60 minutes
+  const [submittingMCQ, setSubmittingMCQ] = useState(false);
+  const [mcqResult, setMcqResult] = useState(null);
+  
+  // Written state
+  const [writtenTimeLeft, setWrittenTimeLeft] = useState(2700); // 45 minutes default
+  const [submittingWritten, setSubmittingWritten] = useState(false);
+  const [examCompleted, setExamCompleted] = useState(false);
+  
+  // Timer ref
+  const timerRef = useRef(null);
 
+  // Start exam on mount
   useEffect(() => {
-    startOrResumeExam();
-    
+    startExam();
     return () => {
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
+  // MCQ Timer
   useEffect(() => {
-    if (!exam || result || !attempt) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        const newTime = prev - 1;
-        localStorage.setItem(`exam_${examId}_time`, newTime);
-        
-        if (newTime <= 0) {
-          handleSubmit();
+    if (currentSection !== 'mcq' || !attempt || mcqResult) return;
+    
+    timerRef.current = setInterval(() => {
+      setMcqTimeLeft(prev => {
+        if (prev <= 1) {
+          handleSubmitMCQ(true); // Auto-submit
           return 0;
         }
-        return newTime;
+        return prev - 1;
       });
     }, 1000);
-
-    return () => clearInterval(timer);
-  }, [exam, result, attempt]);
-
-  // Auto-save answers every 10 seconds
-  useEffect(() => {
-    if (!attempt || result) return;
-    
-    saveTimerRef.current = setTimeout(() => {
-      saveCurrentAnswers();
-    }, 10000);
     
     return () => {
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [answers, attempt, result]);
+  }, [currentSection, attempt, mcqResult]);
 
-  const startOrResumeExam = async () => {
+  // Written Timer
+  useEffect(() => {
+    if (currentSection !== 'written' || examCompleted) return;
+    
+    timerRef.current = setInterval(() => {
+      setWrittenTimeLeft(prev => {
+        if (prev <= 1) {
+          handleSubmitWritten(true); // Auto-submit
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [currentSection, examCompleted]);
+
+  const startExam = async () => {
     try {
       const response = await axios.post(
         `${API}/exams/${examId}/start`,
@@ -72,114 +88,111 @@ const ExamInterface = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      const examData = response.data.exam;
-      const attemptData = response.data.attempt;
-      const isResume = response.data.resume;
+      setExam(response.data.exam);
+      setAttempt(response.data.attempt);
       
-      setExam(examData);
-      setAttempt(attemptData);
-      setAnswers(attemptData.answers || {});
+      // Resume if needed
+      if (response.data.resume) {
+        const attemptData = response.data.attempt;
+        setMcqAnswers(attemptData.mcq_answers || {});
+        
+        if (attemptData.status === 'written_in_progress') {
+          setCurrentSection('written');
+          setMcqResult({ mcq_score: attemptData.mcq_score });
+        }
+      }
       
-      // Calculate time left
-      if (isResume && attemptData.started_at) {
-        const startTime = dayjs(attemptData.started_at);
-        const elapsed = dayjs().diff(startTime, 'second');
-        const totalTime = examData.duration_minutes * 60;
-        const remaining = Math.max(0, totalTime - elapsed);
-        setTimeLeft(remaining);
-        localStorage.setItem(`exam_${examId}_time`, remaining);
-      } else {
-        const totalTime = examData.duration_minutes * 60;
-        setTimeLeft(totalTime);
-        localStorage.setItem(`exam_${examId}_time`, totalTime);
+      // Set timer based on exam config
+      if (response.data.exam) {
+        setMcqTimeLeft(response.data.exam.mcq_duration_minutes * 60 || 3600);
+        setWrittenTimeLeft(response.data.exam.written_duration_minutes * 60 || 2700);
       }
       
       setLoading(false);
-    } catch (error) {
-      console.error('Failed to start exam:', error);
-      alert(t('common.error') + ': ' + (error.response?.data?.detail || error.message));
-      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to start exam');
+      setLoading(false);
     }
   };
 
-  const saveCurrentAnswers = async () => {
-    if (!attempt || Object.keys(answers).length === 0 || saving) return;
+  const handleAnswerSelect = async (questionId, optionId) => {
+    const newAnswers = { ...mcqAnswers, [questionId]: optionId };
+    setMcqAnswers(newAnswers);
     
-    setSaving(true);
-    try {
-      // Save each answer
-      for (const [questionId, selectedOption] of Object.entries(answers)) {
-        await axios.post(
-          `${API}/attempts/${attempt.id}/save`,
-          { question_id: questionId, selected_option: selectedOption },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-      localStorage.setItem(`exam_${examId}_answers`, JSON.stringify(answers));
-    } catch (error) {
-      console.error('Failed to auto-save:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleAnswerSelect = async (questionId, option) => {
-    const newAnswers = {
-      ...answers,
-      [questionId]: option
-    };
-    setAnswers(newAnswers);
-    localStorage.setItem(`exam_${examId}_answers`, JSON.stringify(newAnswers));
-    
-    // Save immediately on answer selection
+    // Auto-save answer
     try {
       await axios.post(
-        `${API}/attempts/${attempt.id}/save`,
-        { question_id: questionId, selected_option: option },
+        `${API}/attempts/${attempt.id}/save-mcq`,
+        { question_id: questionId, selected_option: optionId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-    } catch (error) {
-      console.error('Failed to save answer:', error);
+    } catch (err) {
+      console.error('Failed to save answer');
     }
   };
 
-  const handleSubmit = async () => {
-    if (submitting) return;
+  const handleSubmitMCQ = async (autoSubmit = false) => {
+    if (submittingMCQ) return;
     
-    const questions = exam.paper1_questions || exam.questions || [];
-    const confirmed = window.confirm(
-      `${t('exam.submit')}?\n\n${t('exam.question')} ${t('exam.questions')}: ${Object.keys(answers).length}/${questions.length}`
-    );
+    if (!autoSubmit) {
+      const confirmed = window.confirm(
+        i18n.language === 'si' ? 'MCQ පිළිතුරු යැවීමට අවශ්‍යද?' :
+        i18n.language === 'ta' ? 'MCQ பதில்களை சமர்ப்பிக்க வேண்டுமா?' :
+        'Submit MCQ answers? You cannot change them after submission.'
+      );
+      if (!confirmed) return;
+    }
     
-    if (!confirmed) return;
-
-    setSubmitting(true);
+    setSubmittingMCQ(true);
+    
     try {
       const response = await axios.post(
-        `${API}/attempts/${attempt.id}/submit`,
+        `${API}/attempts/${attempt.id}/submit-mcq`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setResult(response.data);
-      localStorage.removeItem(`exam_${examId}_time`);
-      localStorage.removeItem(`exam_${examId}_answers`);
-    } catch (error) {
-      console.error('Failed to submit exam:', error);
-      alert(t('common.error') + ': ' + (error.response?.data?.detail || error.message));
-      setSubmitting(false);
+      
+      setMcqResult(response.data);
+      setCurrentSection('written');
+      setWrittenTimeLeft(response.data.written_duration_minutes * 60 || 2700);
+      
+      if (timerRef.current) clearInterval(timerRef.current);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to submit MCQ');
+    } finally {
+      setSubmittingMCQ(false);
     }
   };
 
-  const toggleFlag = (questionId) => {
-    setFlagged(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(questionId)) {
-        newSet.delete(questionId);
-      } else {
-        newSet.add(questionId);
-      }
-      return newSet;
-    });
+  const handleSubmitWritten = async (autoSubmit = false) => {
+    if (submittingWritten) return;
+    
+    if (!autoSubmit) {
+      const confirmed = window.confirm(
+        i18n.language === 'si' ? 'ලිඛිත පත්‍රය යැවීමට අවශ්‍යද? දෙමාපියන්ට ඡායාරූප උඩුගත කිරීමට විනාඩි 5ක් පමණි!' :
+        i18n.language === 'ta' ? 'எழுத்துத் தாளை சமர்ப்பிக்க வேண்டுமா? பெற்றோருக்கு புகைப்படங்களை பதிவேற்ற 5 நிமிடங்கள் மட்டுமே!' :
+        'Submit written paper? Parent will have only 5 minutes to upload photos!'
+      );
+      if (!confirmed) return;
+    }
+    
+    setSubmittingWritten(true);
+    
+    try {
+      const response = await axios.post(
+        `${API}/attempts/${attempt.id}/submit-written`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setExamCompleted(true);
+      if (timerRef.current) clearInterval(timerRef.current);
+      
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to submit written paper');
+    } finally {
+      setSubmittingWritten(false);
+    }
   };
 
   const formatTime = (seconds) => {
@@ -188,303 +201,362 @@ const ExamInterface = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#F59E0B] mx-auto mb-4"></div>
-          <p className="text-xl font-semibold text-[#92400E]">{t('common.loading')}</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading exam...</p>
         </div>
       </div>
     );
   }
 
-  if (result) {
+  // Error state
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6] p-4 md:p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10 border-2 border-[#10B981]">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2 text-green-600" style={{fontFamily: 'Manrope, sans-serif'}}>Exam Submitted Successfully!</h1>
-              <p className="text-base md:text-lg text-[#6B7280]">Great job completing the exam!</p>
-            </div>
-
-            {/* Score Card */}
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 md:p-8 mb-6 border-2 border-[#E5E7EB]">
-              <div className="grid grid-cols-3 gap-4 md:gap-6 text-center">
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold mb-2 text-green-600" style={{fontFamily: 'Manrope, sans-serif'}}>{result.score}</div>
-                  <div className="text-xs md:text-sm font-semibold text-[#6B7280]">Your Score</div>
-                </div>
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold mb-2 text-[#92400E]" style={{fontFamily: 'Manrope, sans-serif'}}>{result.total}</div>
-                  <div className="text-xs md:text-sm font-semibold text-[#6B7280]">Total Marks</div>
-                </div>
-                <div>
-                  <div className="text-4xl md:text-5xl font-bold mb-2 text-[#F59E0B]" style={{fontFamily: 'Manrope, sans-serif'}}>{result.percentage}%</div>
-                  <div className="text-xs md:text-sm font-semibold text-[#6B7280]">Percentage</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Skill Breakdown */}
-            <div className="mb-8">
-              <h3 className="text-xl md:text-2xl font-bold mb-4 text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>Performance by Skill</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(result.skill_percentages || {}).map(([skill, percentage]) => (
-                  <div key={skill} className="bg-white border-2 border-[#E5E7EB] rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-semibold text-[#374151] capitalize">
-                        {t(`skills.${skill}`) || skill.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-lg md:text-xl font-bold" style={{color: percentage >= 70 ? '#10B981' : percentage >= 50 ? '#F59E0B' : '#EF4444'}}>
-                        {percentage}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="h-2 rounded-full" 
-                        style={{
-                          width: `${percentage}%`,
-                          background: percentage >= 70 ? '#10B981' : percentage >= 50 ? '#F59E0B' : '#EF4444'
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="w-full py-4 bg-[#F59E0B] text-white font-bold rounded-lg hover:bg-[#D97706] transition-all text-base md:text-lg"
-              style={{fontFamily: 'Manrope, sans-serif'}}
-              data-testid="back-to-dashboard-btn"
-            >
-              {t('common.backToDashboard')} →
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const questions = exam.paper1_questions || [];
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-  const answeredCount = Object.keys(answers).length;
-
-  // Handle empty exam case
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6] p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-md text-center border-2 border-[#EF4444]">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-10 h-10 text-red-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-[#1F2937] mb-4" style={{fontFamily: 'Manrope, sans-serif'}}>
-            Exam Not Available
-          </h2>
-          <p className="text-gray-600 mb-6">
-            This exam does not have any questions yet. Please contact your teacher or try a different exam.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 p-4">
+        <div className="bg-white rounded-xl p-8 shadow-lg max-w-md text-center">
+          <span className="text-5xl">❌</span>
+          <h2 className="text-xl font-bold text-gray-800 mt-4">{error}</h2>
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-full py-3 bg-[#F59E0B] text-white font-bold rounded-lg hover:bg-[#D97706] transition-all"
-            style={{fontFamily: 'Manrope, sans-serif'}}
-            data-testid="back-to-dashboard-btn"
+            className="mt-6 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
-            {t('common.backToDashboard')}
+            Back to Dashboard
           </button>
         </div>
       </div>
     );
   }
 
-  if (!currentQuestion) {
+  // Exam Completed - Show success message
+  if (examCompleted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#F59E0B] mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-[#92400E]">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFBF0] to-[#FFF4E6]">
-      {/* Header with Timer */}
-      <div className="bg-white shadow-md border-b-4 border-[#F59E0B]">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#F59E0B] rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg md:text-xl font-bold text-[#1F2937]" style={{fontFamily: 'Manrope, sans-serif'}}>{exam.title}</h1>
-                <p className="text-xs md:text-sm text-[#6B7280]">{t('exam.question')} {currentQuestionIndex + 1} / {questions.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {saving && (
-                <div className="flex items-center gap-2 text-blue-600 text-sm">
-                  <Save className="w-4 h-4 animate-pulse" />
-                  <span>Saving...</span>
-                </div>
-              )}
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold ${timeLeft < 300 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-                <Clock className="w-5 h-5" />
-                <span className="text-lg" data-testid="exam-timer">{formatTime(timeLeft)}</span>
-              </div>
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-                data-testid="submit-exam-btn"
-              >
-                {submitting ? t('common.loading') : t('exam.submit')}
-              </button>
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 p-4">
+        <div className="bg-white rounded-2xl p-8 shadow-xl max-w-lg text-center">
+          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-5xl">✅</span>
           </div>
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="bg-gray-200 h-2">
-        <div 
-          className="bg-[#F59E0B] h-2 transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto p-4 md:p-6">
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-6 border-2 border-[#E5E7EB]">
-          {/* Question */}
-          <div className="flex justify-between items-start mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-[#1F2937] flex-1" style={{fontFamily: 'Manrope, sans-serif'}}>
-              {currentQuestion.question_number}. {currentQuestion.question_text}
-            </h2>
-            <button
-              onClick={() => toggleFlag(currentQuestion.id)}
-              className={`ml-4 p-2 rounded-lg transition-colors ${
-                flagged.has(currentQuestion.id) 
-                  ? 'bg-red-100 text-red-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              data-testid="flag-question-btn"
-            >
-              <Flag className="w-5 h-5" fill={flagged.has(currentQuestion.id) ? 'currentColor' : 'none'} />
-            </button>
-          </div>
-
-          {/* Options */}
-          <div className="space-y-3">
-            {currentQuestion.options?.map((opt, idx) => {
-              const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D, E
-              const isSelected = answers[currentQuestion.id] === opt.option_id;
-              
-              return (
-                <button
-                  key={opt.option_id}
-                  onClick={() => handleAnswerSelect(currentQuestion.id, opt.option_id)}
-                  className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
-                    isSelected
-                      ? 'border-[#F59E0B] bg-[#FFF7E5] font-semibold'
-                      : 'border-[#E5E7EB] hover:border-[#F59E0B] hover:bg-[#FFFBF0]'
-                  }`}
-                  style={{fontFamily: 'Figtree, sans-serif'}}
-                  data-testid={`option-${optionLetter}`}
-                >
-                  <span className="font-bold text-[#F59E0B] mr-3">{optionLetter}.</span>
-                  <span className="text-[#1F2937]">{opt.text}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
-            disabled={currentQuestionIndex === 0}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            data-testid="prev-question-btn"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            {t('exam.previous')}
-          </button>
           
-          <div className="text-center">
-            <p className="text-sm text-[#6B7280] font-semibold">
-              Answered: {answeredCount} / {questions.length}
+          <h1 className="text-3xl font-bold text-green-600 mb-4">
+            {i18n.language === 'si' ? 'විභාගය සම්පූර්ණයි!' :
+             i18n.language === 'ta' ? 'தேர்வு முடிந்தது!' :
+             'Exam Completed!'}
+          </h1>
+          
+          <div className="bg-gray-50 rounded-xl p-6 mb-6">
+            <p className="text-lg text-gray-700 mb-2">
+              <strong>MCQ Score:</strong> {mcqResult?.mcq_score || 0} / {exam?.mcq_total_questions || 60}
+            </p>
+            <p className="text-sm text-gray-500">
+              Written paper submitted for marking
+            </p>
+          </div>
+          
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+            <p className="text-amber-800 font-medium">
+              {i18n.language === 'si' ? '⚠️ දැන් ඔබේ දෙමාපියන් ලොග් වී ලිඛිත පත්‍රයේ ඡායාරූප විනාඩි 5ක් ඇතුළත උඩුගත කළ යුතුයි!' :
+               i18n.language === 'ta' ? '⚠️ உங்கள் பெற்றோர் இப்போது உள்நுழைந்து 5 நிமிடங்களுக்குள் எழுத்துத் தாளின் புகைப்படங்களை பதிவேற்ற வேண்டும்!' :
+               '⚠️ Your parent must now login and upload photos of written paper within 5 minutes!'}
             </p>
           </div>
           
           <button
-            onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
-            disabled={currentQuestionIndex === questions.length - 1}
-            className="flex items-center gap-2 px-6 py-3 bg-[#F59E0B] text-white font-semibold rounded-lg hover:bg-[#D97706] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            data-testid="next-question-btn"
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
+            data-testid="logout-for-parent-btn"
+            className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold rounded-xl hover:from-blue-600 hover:to-indigo-600 transition-all"
           >
-            {t('exam.next')}
-            <ArrowRight className="w-5 h-5" />
+            {i18n.language === 'si' ? 'ලොග් අවුට් වී දෙමාපියන්ට ලොග් වීමට ඉඩ දෙන්න' :
+             i18n.language === 'ta' ? 'வெளியேறி பெற்றோரை உள்நுழைய அனுமதிக்கவும்' :
+             'Logout & Let Parent Login'}
           </button>
         </div>
+      </div>
+    );
+  }
 
-        {/* Question Palette */}
-        <div className="mt-6 bg-white rounded-xl shadow-lg p-4 border-2 border-[#E5E7EB]">
-          <h3 className="text-sm font-bold text-[#1F2937] mb-3" style={{fontFamily: 'Manrope, sans-serif'}}>Question Navigator</h3>
-          <div className="grid grid-cols-10 gap-2">
-            {questions.map((q, idx) => {
-              const isAnswered = answers[q.id];
-              const isFlagged = flagged.has(q.id);
-              const isCurrent = idx === currentQuestionIndex;
-              
-              return (
-                <button
-                  key={q.id}
-                  onClick={() => setCurrentQuestionIndex(idx)}
-                  className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
-                    isCurrent
-                      ? 'bg-[#F59E0B] text-white border-2 border-[#D97706]'
-                      : isAnswered
-                        ? 'bg-green-100 text-green-700 border-2 border-green-300'
-                        : isFlagged
-                          ? 'bg-red-100 text-red-700 border-2 border-red-300'
-                          : 'bg-gray-100 text-gray-600 border-2 border-gray-300'
-                  }`}
-                  data-testid={`nav-question-${idx + 1}`}
-                >
-                  {idx + 1}
-                </button>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex gap-4 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-green-100 border-2 border-green-300"></div>
-              <span>Answered</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-gray-100 border-2 border-gray-300"></div>
-              <span>Not Answered</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-red-100 border-2 border-red-300"></div>
-              <span>Flagged</span>
-            </div>
+  // MCQ Section
+  if (currentSection === 'mcq') {
+    const questions = exam?.mcq_questions || [];
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    if (questions.length === 0) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 p-4">
+          <div className="bg-white rounded-xl p-8 shadow-lg max-w-md text-center">
+            <span className="text-5xl">📝</span>
+            <h2 className="text-xl font-bold text-gray-800 mt-4">No MCQ questions available</h2>
+            <p className="text-gray-600 mt-2">This exam doesn't have MCQ questions yet.</p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="mt-6 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              Back to Dashboard
+            </button>
           </div>
         </div>
+      );
+    }
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+        {/* Header */}
+        <header className="bg-white shadow-md border-b-4 border-orange-400">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">{exam?.title}</h1>
+                <p className="text-sm text-gray-500">MCQ Section - Question {currentQuestionIndex + 1} / {questions.length}</p>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                {/* Timer */}
+                <div className={`px-4 py-2 rounded-lg font-bold text-lg ${
+                  mcqTimeLeft < 300 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-blue-100 text-blue-600'
+                }`}>
+                  ⏱️ {formatTime(mcqTimeLeft)}
+                </div>
+                
+                {/* Submit Button */}
+                <button
+                  onClick={() => handleSubmitMCQ()}
+                  disabled={submittingMCQ}
+                  data-testid="submit-mcq-btn"
+                  className="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 disabled:opacity-50"
+                >
+                  {submittingMCQ ? 'Submitting...' : 'Submit MCQ'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Progress Bar */}
+        <div className="bg-gray-200 h-2">
+          <div 
+            className="bg-orange-500 h-2 transition-all"
+            style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+          />
+        </div>
+
+        {/* Question */}
+        <main className="max-w-4xl mx-auto p-4 mt-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
+              {currentQuestionIndex + 1}. {currentQuestion?.question_text || currentQuestion?.text}
+            </h2>
+            
+            {/* Options */}
+            <div className="space-y-3">
+              {(currentQuestion?.options || []).map((option, idx) => {
+                const optionId = option.option_id || option.id || String.fromCharCode(65 + idx);
+                const isSelected = mcqAnswers[currentQuestion?.id] === optionId;
+                
+                return (
+                  <button
+                    key={optionId}
+                    onClick={() => handleAnswerSelect(currentQuestion?.id, optionId)}
+                    data-testid={`option-${optionId}`}
+                    className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                      isSelected 
+                        ? 'border-orange-500 bg-orange-50 font-medium' 
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                    }`}
+                  >
+                    <span className="font-bold text-orange-500 mr-3">
+                      {String.fromCharCode(65 + idx)}.
+                    </span>
+                    {option.text}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
+              disabled={currentQuestionIndex === 0}
+              data-testid="prev-btn"
+              className="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 disabled:opacity-50"
+            >
+              ← Previous
+            </button>
+            
+            <span className="text-gray-600 font-medium">
+              Answered: {Object.keys(mcqAnswers).length} / {questions.length}
+            </span>
+            
+            <button
+              onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
+              disabled={currentQuestionIndex === questions.length - 1}
+              data-testid="next-btn"
+              className="px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 disabled:opacity-50"
+            >
+              Next →
+            </button>
+          </div>
+
+          {/* Question Navigator */}
+          <div className="mt-6 bg-white rounded-xl shadow-lg p-4">
+            <h3 className="font-bold text-gray-700 mb-3">Question Navigator</h3>
+            <div className="grid grid-cols-10 gap-2">
+              {questions.map((q, idx) => {
+                const isAnswered = mcqAnswers[q.id];
+                const isCurrent = idx === currentQuestionIndex;
+                
+                return (
+                  <button
+                    key={q.id || idx}
+                    onClick={() => setCurrentQuestionIndex(idx)}
+                    data-testid={`nav-${idx + 1}`}
+                    className={`w-10 h-10 rounded-lg font-medium text-sm ${
+                      isCurrent
+                        ? 'bg-orange-500 text-white'
+                        : isAnswered
+                          ? 'bg-green-100 text-green-700 border border-green-300'
+                          : 'bg-gray-100 text-gray-600 border border-gray-300'
+                    }`}
+                  >
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Written Section
+  if (currentSection === 'written') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+        {/* Header */}
+        <header className="bg-white shadow-md border-b-4 border-green-400">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">{exam?.title}</h1>
+                <p className="text-sm text-gray-500">Written Section</p>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                {/* Timer */}
+                <div className={`px-4 py-2 rounded-lg font-bold text-lg ${
+                  writtenTimeLeft < 300 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-green-100 text-green-600'
+                }`}>
+                  ⏱️ {formatTime(writtenTimeLeft)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* MCQ Result Banner */}
+        {mcqResult && (
+          <div className="bg-blue-50 border-b border-blue-200 py-3">
+            <div className="max-w-6xl mx-auto px-4">
+              <p className="text-blue-700 font-medium">
+                ✅ MCQ Submitted! Score: {mcqResult.mcq_score} / {mcqResult.total_mcq || exam?.mcq_total_questions || 60}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Written Content */}
+        <main className="max-w-4xl mx-auto p-4 mt-6">
+          {/* Essay Section */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="text-2xl">✏️</span> Essay Question
+            </h2>
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <p className="text-gray-700">
+                {exam?.written_essay_prompt || 
+                 (i18n.language === 'si' ? 'ඔබේ පාසලේ ක්‍රීඩා උත්සවය ගැන ඡේද 3-4 කින් ලියන්න.' :
+                  i18n.language === 'ta' ? 'உங்கள் பள்ளி விளையாட்டு தினத்தை பற்றி 3-4 பத்திகளில் எழுதுங்கள்.' :
+                  'Write 3-4 paragraphs about your school sports day.')}
+              </p>
+            </div>
+            <p className="text-sm text-gray-500">
+              {i18n.language === 'si' ? 'ඔබේ පිළිතුර පත්‍රයේ ලියන්න. විභාගයෙන් පසු ඔබේ දෙමාපියන් එහි ඡායාරූපයක් උඩුගත කරනු ඇත.' :
+               i18n.language === 'ta' ? 'உங்கள் பதிலை தாளில் எழுதுங்கள். தேர்வுக்குப் பிறகு உங்கள் பெற்றோர் அதன் புகைப்படத்தை பதிவேற்றுவார்கள்.' :
+               'Write your answer on paper. Your parent will upload a photo of it after the exam.'}
+            </p>
+          </div>
+
+          {/* Short Answer Questions */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="text-2xl">📝</span> Short Answer Questions
+            </h2>
+            <div className="space-y-4">
+              {(exam?.written_short_questions || [
+                'What is the capital of Sri Lanka?',
+                'Name three rivers in Sri Lanka.',
+                'What is 25 + 37?',
+                'Write the Sinhala alphabet vowels.',
+                'Name the president of Sri Lanka.'
+              ]).map((question, idx) => (
+                <div key={idx} className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-700 font-medium">
+                    {idx + 1}. {question}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
+              {i18n.language === 'si' ? 'සියලුම පිළිතුරු ඔබේ පිළිතුරු පත්‍රයේ ලියන්න.' :
+               i18n.language === 'ta' ? 'அனைத்து பதில்களையும் உங்கள் பதில் தாளில் எழுதுங்கள்.' :
+               'Write all answers on your answer sheet.'}
+            </p>
+          </div>
+
+          {/* Submit Button */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
+            <h3 className="font-bold text-amber-800 mb-2">
+              {i18n.language === 'si' ? '⚠️ වැදගත්:' :
+               i18n.language === 'ta' ? '⚠️ முக்கியம்:' :
+               '⚠️ Important:'}
+            </h3>
+            <ul className="text-amber-700 space-y-1 text-sm mb-4">
+              <li>• {i18n.language === 'si' ? 'ඔබ යැවීමෙන් පසු, ඔබේ දෙමාපියන්ට ලොග් වීමට විනාඩි 5ක් පමණක් ඇත' :
+                      i18n.language === 'ta' ? 'நீங்கள் சமர்ப்பித்த பிறகு, உங்கள் பெற்றோருக்கு உள்நுழைய 5 நிமிடங்கள் மட்டுமே உள்ளது' :
+                      'After you submit, your parent has only 5 minutes to login'}</li>
+              <li>• {i18n.language === 'si' ? 'දෙමාපියන් ඔබේ ලිඛිත පත්‍රයේ ඡායාරූප උඩුගත කළ යුතුයි' :
+                      i18n.language === 'ta' ? 'பெற்றோர் உங்கள் எழுத்துத் தாளின் புகைப்படங்களை பதிவேற்ற வேண்டும்' :
+                      'Parent must upload photos of your written paper'}</li>
+              <li>• {i18n.language === 'si' ? 'ඡායාරූප උඩුගත නොකළහොත්, ලිඛිත පත්‍රය ලකුණු නොකරනු ඇත' :
+                      i18n.language === 'ta' ? 'புகைப்படங்கள் பதிவேற்றப்படாவிட்டால், எழுத்துத் தாள் மதிப்பிடப்படாது' :
+                      'If photos are not uploaded, written paper will not be marked'}</li>
+            </ul>
+          </div>
+
+          <button
+            onClick={() => handleSubmitWritten()}
+            disabled={submittingWritten}
+            data-testid="submit-written-btn"
+            className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl text-lg hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 shadow-lg"
+          >
+            {submittingWritten ? 'Submitting...' : 
+             (i18n.language === 'si' ? 'ලිඛිත පත්‍රය යවන්න' :
+              i18n.language === 'ta' ? 'எழுத்துத் தாளை சமர்ப்பிக்கவும்' :
+              'Submit Written Paper')}
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default ExamInterface;

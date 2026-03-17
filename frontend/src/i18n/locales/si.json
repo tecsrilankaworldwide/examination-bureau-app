@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "අධ්‍යාපන ප්‍රතිසංස්කරණ කාර්යාංශය",
+    "tagline": "අනාගත විද්වතුන් බිහි කිරීම",
+    "since": "1982 සිට අධ්‍යාපනයේ විශිෂ්ටත්වය",
+    "portal": "5 ශ්‍රේණිය ශිෂ්‍යත්ව විභාග පෝර්ටලය",
+    "official": "නිල මාර්ගගත විභාග පද්ධතිය",
+    "copyright": "© 2026 educationreforms.cloud | සියලු හිමිකම් ඇවිරිණි."
+  },
+  "auth": {
+    "signIn": "පිවිසෙන්න",
+    "signInDesc": "පෝර්ටලයට ප්‍රවේශ වීමට ඔබගේ අක්තපත්‍ර ඇතුළත් කරන්න",
+    "email": "දෙමාපිය/භාරකරු විද්‍යුත් තැපැල් ලිපිනය",
+    "emailHint": "සිසුන් ඔවුන්ගේ දෙමාපියන්ගේ ලියාපදිංචි විද්‍යුත් තැපෑල භාවිතා කළ යුතුය",
+    "password": "මුරපදය",
+    "passwordPlaceholder": "ඔබගේ මුරපදය ඇතුළත් කරන්න",
+    "signInButton": "පෝර්ටලයට පිවිසෙන්න",
+    "needHelp": "සහාය අවශ්‍යද? ඔබගේ පාසල් පරිපාලක අමතන්න",
+    "logout": "පිටවීම",
+    "invalidCredentials": "වලංගු නොවන අක්තපත්‍ර"
+  },
+  "dashboard": {
+    "student": "සිසු උපකරණ පුවරුව",
+    "teacher": "ගුරු උපකරණ පුවරුව",
+    "parent": "දෙමාපිය පෝර්ටලය",
+    "admin": "පරිපාලක උපකරණ පුවරුව",
+    "welcome": "සාදරයෙන් පිළිගනිමු"
+  },
+  "exam": {
+    "availableExams": "පවතින මාසික විභාග",
+    "startExam": "විභාගය ආරම්භ කරන්න",
+    "continueExam": "විභාගය දිගටම කරගෙන යන්න",
+    "viewResults": "ප්‍රතිඵල බලන්න",
+    "questions": "ප්‍රශ්න",
+    "minutes": "මිනිත්තු",
+    "month": "මාසය",
+    "completed": "සම්පූර්ණයි",
+    "available": "පවතින විභාග",
+    "avgScore": "සාමාන්‍ය ලකුණු",
+    "timeRemaining": "ඉතිරි කාලය",
+    "submit": "විභාගය භාර දෙන්න",
+    "next": "ඊළඟ",
+    "previous": "පෙර",
+    "question": "ප්‍රශ්නය"
+  },
+  "progress": {
+    "title": "ප්‍රගති වාර්තාව",
+    "viewProgress": "ප්‍රගති වාර්තාව බලන්න",
+    "skillAnalysis": "සවිස්තරාත්මක කුසලතා විශ්ලේෂණය",
+    "overallAverage": "සමස්ත සාමාන්‍යය",
+    "examsCompleted": "සම්පූර්ණ කළ විභාග",
+    "skillsTracked": "නිරීක්ෂණය කළ කුසලතා",
+    "currentSnapshot": "වත්මන් කුසලතා දළ විసඳුම",
+    "monthlyProgress": "මාසික ප්‍රගතිය",
+    "detailedAnalysis": "සවිස්තර කුසලතා විශ්ලේෂණය",
+    "strong": "ශක්තිමත්",
+    "average": "සාමාන්‍ය",
+    "needsImprovement": "වැඩිදියුණු කළ යුතුය",
+    "noData": "තවම දත්ත නොමැත",
+    "noDataDesc": "ප්‍රගති වාර්තාව බැලීමට සිසුවා විභාග සම්පූර්ණ කළ යුතුය"
+  },
+  "skills": {
+    "mathematical_reasoning": "ගණිතමය තර්කනය",
+    "language_proficiency": "භාෂා ප්‍රවීණතාව",
+    "general_knowledge": "සාමාන්‍ය දැනුම",
+    "comprehension_skills": "අවබෝධ කුසලතා",
+    "problem_solving": "ගැටළු විසඳීම",
+    "logical_thinking": "තාර්කික චින්තනය",
+    "spatial_reasoning": "අවකාශීය තර්කනය",
+    "memory_recall": "මතක හා නැවත කැඳවීම",
+    "analytical_skills": "විශ්ලේෂණාත්මක කුසලතා",
+    "critical_thinking": "විවේචනාත්මක චින්තනය"
+  },
+  "common": {
+    "back": "ආපසු",
+    "backToDashboard": "උපකරණ පුවරුවට ආපසු",
+    "loading": "පූරණය වෙමින්...",
+    "error": "දෝෂයක්",
+    "success": "සාර්ථකයි",
+    "save": "සුරකින්න",
+    "cancel": "අවලංගු කරන්න",
+    "delete": "මකන්න",
+    "edit": "සංස්කරණය",
+    "view": "බලන්න",
+    "create": "සාදන්න",
+    "search": "සොයන්න",
+    "grade2": "2 ශ්‍රේණිය",
+    "grade3": "3 ශ්‍රේණිය",
+    "grade4": "4 ශ්‍රේණිය",
+    "grade5": "5 ශ්‍රේණිය"
+  },
+  "teacher": {
+    "totalExams": "මුළු විභාග",
+    "published": "ප්‍රකාශිත",
+    "drafts": "කෙටුම්පත්",
+    "students": "සිසුන්",
+    "examManagement": "විභාග කළමනාකරණය",
+    "createExam": "සාදන්න",
+    "paper2": "ප්‍රශ්න පත්‍රය 2"
+  },
+  "parent": {
+    "linkedChildren": "සම්බන්ධිත දරුවන්",
+    "avgProgress": "සාමාන්‍ය ප්‍රගතිය",
+    "completedExams": "සම්පූර්ණ කළ විභාග",
+    "childrenProgress": "ඔබේ දරුවන්ගේ ප්‍රගතිය",
+    "linkStudent": "සම්බන්ධ කරන්න"
+  },
+  "admin": {
+    "userManagement": "පරිශීලක කළමනාකරණය",
+    "addUser": "පරිශීලකයෙකු එකතු කරන්න",
+    "teachers": "ගුරුවරුන්",
+    "parents": "දෙමාපියන්",
+    "active": "සක්‍රීය",
+    "inactive": "අක්‍රීය"
+  }
+}

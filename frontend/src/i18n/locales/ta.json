@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "கல்வி சீர்திருத்த அலுவலகம்",
+    "tagline": "எதிர்கால அறிஞர்களை உருவாக்குதல்",
+    "since": "1982 முதல் கல்வியில் சிறந்து விளங்குகிறது",
+    "portal": "தரம் 5 புலமைப்பரிசில் தேர்வு போர்டல்",
+    "official": "அதிகாரப்பூர்வ ஆன்லைன் தேர்வு முறை",
+    "copyright": "© 2026 educationreforms.cloud | அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை."
+  },
+  "auth": {
+    "signIn": "உள்நுழைக",
+    "signInDesc": "போர்டலை அணுக உங்கள் சான்றுகளை உள்ளிடவும்",
+    "email": "பெற்றோர்/பாதுகாவலர் மின்னஞ்சல் முகவரி",
+    "emailHint": "மாணவர்கள் தங்கள் பெற்றோரின் பதிவுசெய்த மின்னஞ்சலைப் பயன்படுத்த வேண்டும்",
+    "password": "கடவுச்சொல்",
+    "passwordPlaceholder": "உங்கள் கடவுச்சொல்லை உள்ளிடவும்",
+    "signInButton": "போர்டலில் உள்நுழைக",
+    "needHelp": "உதவி தேவையா? உங்கள் பள்ளி நிர்வாகியைத் தொடர்பு கொள்ளவும்",
+    "logout": "வெளியேறு",
+    "invalidCredentials": "தவறான சான்றுகள்"
+  },
+  "dashboard": {
+    "student": "மாணவர் டாஷ்போர்டு",
+    "teacher": "ஆசிரியர் டாஷ்போர்டு",
+    "parent": "பெற்றோர் போர்டல்",
+    "admin": "நிர்வாக டாஷ்போர்டு",
+    "welcome": "வரவேற்கிறோம்"
+  },
+  "exam": {
+    "availableExams": "கிடைக்கும் மாதாந்திர தேர்வுகள்",
+    "startExam": "தேர்வைத் தொடங்கு",
+    "continueExam": "தேர்வைத் தொடர்",
+    "viewResults": "முடிவுகளைக் காண்க",
+    "questions": "கேள்விகள்",
+    "minutes": "நிமிடங்கள்",
+    "month": "மாதம்",
+    "completed": "முடிந்தது",
+    "available": "கிடைக்கும் தேர்வுகள்",
+    "avgScore": "சராசரி மதிப்பெண்",
+    "timeRemaining": "மீதமுள்ள நேரம்",
+    "submit": "தேர்வை சமர்ப்பி",
+    "next": "அடுத்து",
+    "previous": "முந்தைய",
+    "question": "கேள்வி"
+  },
+  "progress": {
+    "title": "முன்னேற்ற அறிக்கை",
+    "viewProgress": "முன்னேற்ற அறிக்கையைக் காண்க",
+    "skillAnalysis": "விரிவான திறன் பகுப்பாய்வு",
+    "overallAverage": "ஒட்டுமொத்த சராசரி",
+    "examsCompleted": "முடிக்கப்பட்ட தேர்வுகள்",
+    "skillsTracked": "கண்காணிக்கப்பட்ட திறன்கள்",
+    "currentSnapshot": "தற்போதைய திறன் நிலை",
+    "monthlyProgress": "மாதாந்திர முன்னேற்றம்",
+    "detailedAnalysis": "விரிவான திறன் பகுப்பாய்வு",
+    "strong": "வலுவான",
+    "average": "சராசரி",
+    "needsImprovement": "மேம்படுத்த வேண்டும்",
+    "noData": "இன்னும் தரவு இல்லை",
+    "noDataDesc": "முன்னேற்ற அறிக்கையைப் பார்க்க மாணவர் தேர்வுகளை முடிக்க வேண்டும்"
+  },
+  "skills": {
+    "mathematical_reasoning": "கணித பகுத்தறிவு",
+    "language_proficiency": "மொழித் திறன்",
+    "general_knowledge": "பொது அறிவு",
+    "comprehension_skills": "புரிதல் திறன்",
+    "problem_solving": "சிக்கல் தீர்த்தல்",
+    "logical_thinking": "தர்க்கரீதியான சிந்தனை",
+    "spatial_reasoning": "இடஞ்சார்ந்த பகுத்தறிவு",
+    "memory_recall": "நினைவகம் & மீட்டெடுப்பு",
+    "analytical_skills": "பகுப்பாய்வு திறன்கள்",
+    "critical_thinking": "விமர்சன சிந்தனை"
+  },
+  "common": {
+    "back": "பின்செல்",
+    "backToDashboard": "டாஷ்போர்டுக்குத் திரும்பு",
+    "loading": "ஏற்றுகிறது...",
+    "error": "பிழை",
+    "success": "வெற்றி",
+    "save": "சேமி",
+    "cancel": "ரத்துசெய்",
+    "delete": "நீக்கு",
+    "edit": "திருத்து",
+    "view": "காண்க",
+    "create": "உருவாக்கு",
+    "search": "தேடு",
+    "grade2": "தரம் 2",
+    "grade3": "தரம் 3",
+    "grade4": "தரம் 4",
+    "grade5": "தரம் 5"
+  },
+  "teacher": {
+    "totalExams": "மொத்த தேர்வுகள்",
+    "published": "வெளியிடப்பட்டது",
+    "drafts": "வரைவுகள்",
+    "students": "மாணவர்கள்",
+    "examManagement": "தேர்வு மேலாண்மை",
+    "createExam": "உருவாக்கு",
+    "paper2": "தாள் 2"
+  },
+  "parent": {
+    "linkedChildren": "இணைக்கப்பட்ட குழந்தைகள்",
+    "avgProgress": "சராசரி முன்னேற்றம்",
+    "completedExams": "முடிக்கப்பட்ட தேர்வுகள்",
+    "childrenProgress": "உங்கள் குழந்தைகளின் முன்னேற்றம்",
+    "linkStudent": "இணை"
+  },
+  "admin": {
+    "userManagement": "பயனர் மேலாண்மை",
+    "addUser": "பயனரைச் சேர்",
+    "teachers": "ஆசிரியர்கள்",
+    "parents": "பெற்றோர்கள்",
+    "active": "செயலில்",
+    "inactive": "செயலற்றது"
+  }
+}

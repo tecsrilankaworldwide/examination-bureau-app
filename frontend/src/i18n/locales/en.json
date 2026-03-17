@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "Education Reforms Bureau",
+    "tagline": "Building Future Scholars",
+    "since": "Excellence in Education Since 1982",
+    "portal": "Grade 5 Scholarship Exam Portal",
+    "official": "Official Online Examination System",
+    "copyright": "© 2026 educationreforms.cloud | All rights reserved."
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signInDesc": "Enter your credentials to access the portal",
+    "email": "Parent/Guardian Email Address",
+    "emailHint": "Students must use their parent's registered email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signInButton": "Sign In to Portal",
+    "needHelp": "Need assistance? Contact your school administrator",
+    "logout": "Logout",
+    "invalidCredentials": "Invalid credentials"
+  },
+  "dashboard": {
+    "student": "Student Dashboard",
+    "teacher": "Teacher Dashboard",
+    "parent": "Parent Portal",
+    "admin": "Admin Dashboard",
+    "welcome": "Welcome"
+  },
+  "exam": {
+    "availableExams": "Available Monthly Exams",
+    "startExam": "Start Exam",
+    "continueExam": "Continue Exam",
+    "viewResults": "View Results",
+    "questions": "questions",
+    "minutes": "mins",
+    "month": "Month",
+    "completed": "Completed",
+    "available": "Available Exams",
+    "avgScore": "Avg Score",
+    "timeRemaining": "Time Remaining",
+    "submit": "Submit Exam",
+    "next": "Next",
+    "previous": "Previous",
+    "question": "Question"
+  },
+  "progress": {
+    "title": "Progress Report",
+    "viewProgress": "View Progress Report",
+    "skillAnalysis": "Comprehensive Skill Analysis",
+    "overallAverage": "Overall Average",
+    "examsCompleted": "Exams Completed",
+    "skillsTracked": "Skills Tracked",
+    "currentSnapshot": "Current Skills Snapshot",
+    "monthlyProgress": "Month-on-Month Progress",
+    "detailedAnalysis": "Detailed Skill Analysis",
+    "strong": "Strong",
+    "average": "Average",
+    "needsImprovement": "Needs Improvement",
+    "noData": "No Data Available Yet",
+    "noDataDesc": "Student needs to complete exams to view progress report"
+  },
+  "skills": {
+    "mathematical_reasoning": "Mathematical Reasoning",
+    "language_proficiency": "Language Proficiency",
+    "general_knowledge": "General Knowledge",
+    "comprehension_skills": "Comprehension",
+    "problem_solving": "Problem Solving",
+    "logical_thinking": "Logical Thinking",
+    "spatial_reasoning": "Spatial Reasoning",
+    "memory_recall": "Memory & Recall",
+    "analytical_skills": "Analytical Skills",
+    "critical_thinking": "Critical Thinking"
+  },
+  "common": {
+    "back": "Back",
+    "backToDashboard": "Back to Dashboard",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "create": "Create",
+    "search": "Search",
+    "grade2": "Grade 2",
+    "grade3": "Grade 3",
+    "grade4": "Grade 4",
+    "grade5": "Grade 5"
+  },
+  "teacher": {
+    "totalExams": "Total Exams",
+    "published": "Published",
+    "drafts": "Drafts",
+    "students": "Students",
+    "examManagement": "Exam Management",
+    "createExam": "Create",
+    "paper2": "Paper 2"
+  },
+  "parent": {
+    "linkedChildren": "Linked Children",
+    "avgProgress": "Avg Progress",
+    "completedExams": "Completed Exams",
+    "childrenProgress": "Your Children's Progress",
+    "linkStudent": "Link"
+  },
+  "admin": {
+    "userManagement": "User Management",
+    "addUser": "Add User",
+    "teachers": "Teachers",
+    "parents": "Parents",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

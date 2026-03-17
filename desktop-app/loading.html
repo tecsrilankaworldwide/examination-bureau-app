@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #92400E;
+        }
+        .loading-container {
+            text-align: center;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #92400E;
+        }
+        p {
+            font-size: 16px;
+            color: #78350F;
+            margin-bottom: 30px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto;
+            border: 4px solid #FCD34D;
+            border-top: 4px solid #F59E0B;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #92400E;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="logo">🎓</div>
+        <h1>Grade 5 Scholarship Exam Platform</h1>
+        <p>Education Reforms Bureau</p>
+        <div class="spinner"></div>
+        <div class="status" id="status">Starting services...</div>
+    </div>
+
+    <script>
+        const statuses = [
+            'Starting database...',
+            'Loading exam data...',
+            'Starting backend server...',
+            'Preparing interface...',
+            'Almost ready...'
+        ];
+        let currentStatus = 0;
+
+        setInterval(() => {
+            currentStatus = (currentStatus + 1) % statuses.length;
+            document.getElementById('status').textContent = statuses[currentStatus];
+        }, 2000);
+    </script>
+</body>
+</html>

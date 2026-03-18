@@ -1,205 +1,204 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog, session } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
-const Store = require('electron-store');
-const fixPath = require('fix-path');
 
-// Fix PATH on macOS
-fixPath();
+const SERVER_URL = 'https://grade5exam.com';
+const APP_TITLE = 'Grade 5 Scholarship Exam Platform';
 
-const store = new Store();
 let mainWindow;
-let backendProcess;
-let mongoProcess;
-let frontendProcess;
-
-// Paths
-const isDev = process.env.NODE_ENV === 'development';
-const resourcesPath = process.resourcesPath || path.join(__dirname, '../');
-const backendPath = path.join(resourcesPath, 'backend');
-const mongoPath = path.join(resourcesPath, 'portable_mongodb');
-const frontendPath = path.join(resourcesPath, 'frontend', 'build');
+let isConnected = false;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 800,
+    width: 1366,
+    height: 868,
+    minWidth: 1024,
+    minHeight: 700,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      webviewTag: false
     },
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    title: 'Grade 5 Scholarship Exam Platform',
-    show: false
+    title: APP_TITLE,
+    show: false,
+    backgroundColor: '#FFFBF0',
+    autoHideMenuBar: false
   });
 
-  // Show splash/loading screen
+  // Build application menu
+  const menuTemplate = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Refresh',
+          accelerator: 'F5',
+          click: () => { mainWindow.webContents.reload(); }
+        },
+        {
+          label: 'Go to Login',
+          click: () => { mainWindow.loadURL(SERVER_URL + '/login'); }
+        },
+        { type: 'separator' },
+        {
+          label: 'Exit',
+          accelerator: 'Alt+F4',
+          click: () => { app.quit(); }
+        }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Zoom In',
+          accelerator: 'CmdOrCtrl+=',
+          click: () => { mainWindow.webContents.setZoomLevel(mainWindow.webContents.getZoomLevel() + 0.5); }
+        },
+        {
+          label: 'Zoom Out',
+          accelerator: 'CmdOrCtrl+-',
+          click: () => { mainWindow.webContents.setZoomLevel(mainWindow.webContents.getZoomLevel() - 0.5); }
+        },
+        {
+          label: 'Reset Zoom',
+          accelerator: 'CmdOrCtrl+0',
+          click: () => { mainWindow.webContents.setZoomLevel(0); }
+        },
+        { type: 'separator' },
+        {
+          label: 'Full Screen',
+          accelerator: 'F11',
+          click: () => { mainWindow.setFullScreen(!mainWindow.isFullScreen()); }
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'About',
+          click: () => {
+            dialog.showMessageBox(mainWindow, {
+              type: 'info',
+              title: 'About',
+              message: APP_TITLE,
+              detail: `Version ${app.getVersion()}\n\nExamination Evaluation Bureau\nTEC Sri Lanka Worldwide (Pvt.) Ltd\n\nServer: ${SERVER_URL}`,
+              buttons: ['OK']
+            });
+          }
+        },
+        {
+          label: 'Check Connection',
+          click: () => { checkConnection(); }
+        }
+      ]
+    }
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+
+  // Show loading screen first
   mainWindow.loadFile(path.join(__dirname, 'loading.html'));
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    connectToServer();
   });
 
-  // Start services
-  startServices();
+  // Handle external links — open in default browser
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http') && !url.includes('grade5exam.com')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    return { action: 'allow' };
+  });
+
+  // Handle navigation errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error(`Failed to load: ${errorDescription} (${errorCode})`);
+    if (!isConnected) {
+      mainWindow.loadFile(path.join(__dirname, 'loading.html'));
+      setTimeout(() => connectToServer(), 5000);
+    }
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
-function startMongoDB() {
-  return new Promise((resolve, reject) => {
-    const mongoDataPath = path.join(mongoPath, 'data');
-    const mongoBin = process.platform === 'win32' ? 
-      path.join(mongoPath, 'mongod.exe') : 
-      path.join(mongoPath, 'mongod');
-
-    console.log('Starting MongoDB...');
-    mongoProcess = spawn(mongoBin, [
-      '--dbpath', mongoDataPath,
-      '--port', '27017',
-      '--bind_ip', '127.0.0.1'
-    ]);
-
-    mongoProcess.stdout.on('data', (data) => {
-      console.log(`MongoDB: ${data}`);
-      if (data.includes('Waiting for connections')) {
-        resolve();
-      }
-    });
-
-    mongoProcess.stderr.on('data', (data) => {
-      console.error(`MongoDB Error: ${data}`);
-    });
-
-    mongoProcess.on('error', (error) => {
-      console.error('Failed to start MongoDB:', error);
-      reject(error);
-    });
-
-    // Timeout after 10 seconds
-    setTimeout(() => resolve(), 10000);
-  });
-}
-
-function startBackend() {
-  return new Promise((resolve, reject) => {
-    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    const serverPath = path.join(backendPath, 'server.py');
-
-    console.log('Starting Backend...');
-    backendProcess = spawn(pythonCmd, [serverPath], {
-      cwd: backendPath,
-      env: {
-        ...process.env,
-        MONGO_URL: 'mongodb://127.0.0.1:27017',
-        DB_NAME_EXAM: 'exam_bureau_db',
-        SECRET_KEY: 'exam-bureau-desktop-2024',
-        CORS_ORIGINS: 'http://localhost:3000',
-        PORT: '8001'
-      }
-    });
-
-    backendProcess.stdout.on('data', (data) => {
-      console.log(`Backend: ${data}`);
-      if (data.includes('Application startup complete')) {
-        resolve();
-      }
-    });
-
-    backendProcess.stderr.on('data', (data) => {
-      console.error(`Backend Error: ${data}`);
-    });
-
-    backendProcess.on('error', (error) => {
-      console.error('Failed to start Backend:', error);
-      reject(error);
-    });
-
-    // Timeout after 10 seconds
-    setTimeout(() => resolve(), 10000);
-  });
-}
-
-async function startServices() {
+async function connectToServer() {
   try {
-    // Start MongoDB
-    await startMongoDB();
-    console.log('✓ MongoDB started');
-
-    // Wait a bit
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Start Backend
-    await startBackend();
-    console.log('✓ Backend started');
-
-    // Wait for backend to be ready
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    // Load application (served by backend or static)
-    mainWindow.loadURL('http://localhost:8001/');
-
-    // If backend serves static files, use that
-    // Otherwise, you'd need to serve frontend separately
-
+    const response = await fetch(`${SERVER_URL}/api/`);
+    if (response.ok) {
+      isConnected = true;
+      mainWindow.loadURL(`${SERVER_URL}/login`);
+      console.log('Connected to server successfully');
+    } else {
+      throw new Error(`Server returned ${response.status}`);
+    }
   } catch (error) {
-    console.error('Failed to start services:', error);
-    dialog.showErrorBox(
-      'Startup Error',
-      'Failed to start application services. Please check logs.'
-    );
-    app.quit();
+    console.error('Connection failed:', error.message);
+    isConnected = false;
+    // Retry after 5 seconds
+    setTimeout(() => {
+      if (mainWindow && !isConnected) {
+        connectToServer();
+      }
+    }, 5000);
   }
 }
 
-function stopServices() {
-  console.log('Stopping services...');
-
-  if (backendProcess) {
-    backendProcess.kill();
-    backendProcess = null;
+async function checkConnection() {
+  try {
+    const response = await fetch(`${SERVER_URL}/api/`);
+    const data = await response.json();
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Connection Status',
+      message: 'Connected to Server',
+      detail: `Server: ${SERVER_URL}\nStatus: ${data.status || 'OK'}\nVersion: ${data.version || 'Unknown'}`,
+      buttons: ['OK']
+    });
+  } catch (error) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: 'Connection Status',
+      message: 'Cannot Connect to Server',
+      detail: `Server: ${SERVER_URL}\nError: ${error.message}\n\nPlease check your internet connection.`,
+      buttons: ['Retry', 'OK']
+    }).then(result => {
+      if (result.response === 0) {
+        connectToServer();
+      }
+    });
   }
+}
 
-  if (mongoProcess) {
-    mongoProcess.kill();
-    mongoProcess = null;
-  }
-
-  if (frontendProcess) {
-    frontendProcess.kill();
-    frontendProcess = null;
-  }
+// Single instance lock — prevent multiple app windows
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
 }
 
 app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
-  stopServices();
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  app.quit();
 });
 
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
-});
-
-app.on('before-quit', () => {
-  stopServices();
-});
-
-// IPC handlers
-ipcMain.handle('get-version', () => {
-  return app.getVersion();
-});
-
-ipcMain.handle('restart-services', async () => {
-  stopServices();
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  await startServices();
-  return true;
 });

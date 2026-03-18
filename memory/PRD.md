@@ -98,10 +98,15 @@ Complete exam system for Grade 2-5 scholarship preparation with strict flow cont
 
 ## Remaining Tasks
 
-### P0 - Desktop App (.exe)
-- [ ] Network-based desktop app using Electron
-- [ ] Connects to grade5exam.com server
-- [ ] For island-wide admin/staff use
+### P0 - Desktop App (.exe) — COMPLETED 2026-03-18
+- [x] Network-based Electron app connecting to grade5exam.com
+- [x] Auto-reconnect on network failure
+- [x] Loading screen with connection status
+- [x] App menu with refresh, zoom, fullscreen, about
+- [x] Single-instance lock (prevents multiple windows)
+- [x] Custom graduation cap icon
+- [x] Portable .exe built (103MB zip)
+- [x] Download available at: https://grade5exam.com/downloads/Grade5-Exam-Portable-v2.1.0.zip
 
 ### P1 - End-to-End Exam Flow Testing
 - [ ] Full walkthrough on live system

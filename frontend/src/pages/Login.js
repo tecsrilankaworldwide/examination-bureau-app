@@ -82,7 +82,7 @@ const Login = () => {
                   required
                   className="w-full px-4 py-3 border-2 border-[#D1D5DB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:border-[#F59E0B] transition-all text-base bg-white"
                   style={{fontFamily: 'Figtree, sans-serif'}}
-                  placeholder="parent@email.com"
+                  placeholder="user@email.com"
                   data-testid="login-email"
                 />
                 <p className="text-sm mt-2 text-[#6B7280]">
@@ -134,9 +134,9 @@ const Login = () => {
           {/* Registration Link */}
           <div className="text-center mt-6 space-y-2">
             <p className="text-sm text-gray-600">
-              New student? 
+              {t('auth.newStudent')}
               <a href="/register" className="text-orange-500 hover:text-orange-600 font-medium ml-1">
-                Register here / ලියාපදිංචි වන්න
+                {t('auth.registerHere')}
               </a>
             </p>
             <p className="text-sm text-[#6B7280]">{t('app.copyright')}</p>

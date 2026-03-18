@@ -4,7 +4,7 @@
   "backend_issues": {
     "critical_bugs": [
       {
-        "endpoint": "External URL https://app-install-hub-1.preview.emergentagent.com/api/*",
+        "endpoint": "External URL https://exam-platform-dev.preview.emergentagent.com/api/*",
         "issue": "All API endpoints return 404 - external routing configuration missing",
         "impact": "Completely blocks all frontend-backend integration and user functionality",
         "fix_priority": "CRITICAL", 
@@ -97,7 +97,7 @@
 
   "updated_files": ["/app/backend_test.py", "/app/backend_internal_test.py"],
 
-  "action_item_for_main_agent": "CRITICAL PRIORITY: Configure external URL routing for backend API endpoints. The backend application is fully functional and tested at 100% success rate on localhost:8001, but the external URL https://app-install-hub-1.preview.emergentagent.com/api/* returns 404 for all API endpoints. This requires configuring the Kubernetes ingress/proxy to properly route /api/* requests to the backend service on port 8001. All specified features from the review request work perfectly internally: Student-Parent registration, Login system, 60 MCQ sample exam, Admin/Marker access, but none are accessible to end users due to this routing configuration gap.",
+  "action_item_for_main_agent": "CRITICAL PRIORITY: Configure external URL routing for backend API endpoints. The backend application is fully functional and tested at 100% success rate on localhost:8001, but the external URL https://exam-platform-dev.preview.emergentagent.com/api/* returns 404 for all API endpoints. This requires configuring the Kubernetes ingress/proxy to properly route /api/* requests to the backend service on port 8001. All specified features from the review request work perfectly internally: Student-Parent registration, Login system, 60 MCQ sample exam, Admin/Marker access, but none are accessible to end users due to this routing configuration gap.",
 
   "should_call_test_agent_after_fix": "true",
   "should_main_agent_test_itself": "false"

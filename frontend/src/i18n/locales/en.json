@@ -10,14 +10,16 @@
   "auth": {
     "signIn": "Sign In",
     "signInDesc": "Enter your credentials to access the portal",
-    "email": "Parent/Guardian Email Address",
-    "emailHint": "Students must use their parent's registered email",
+    "email": "Email Address",
+    "emailHint": "Use the email address registered for your account",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
     "signInButton": "Sign In to Portal",
     "needHelp": "Need assistance? Contact your school administrator",
     "logout": "Logout",
-    "invalidCredentials": "Invalid credentials"
+    "invalidCredentials": "Invalid credentials",
+    "newStudent": "New student?",
+    "registerHere": "Register here"
   },
   "dashboard": {
     "student": "Student Dashboard",

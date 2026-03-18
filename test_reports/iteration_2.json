@@ -4,7 +4,7 @@
   "backend_issues": {
     "critical_bugs": [
       {
-        "endpoint": "External URL https://app-install-hub-1.preview.emergentagent.com/api/*",
+        "endpoint": "External URL https://exam-platform-dev.preview.emergentagent.com/api/*",
         "issue": "All API endpoints return 404 - external routing not configured",
         "impact": "Completely blocks all frontend-backend integration and user functionality",
         "fix_priority": "CRITICAL",
@@ -79,7 +79,7 @@
 
   "updated_files": ["/app/backend_test.py"],
 
-  "action_item_for_main_agent": "CRITICAL PRIORITY: Fix external URL routing configuration. The backend application is fully functional on localhost:8001 but the external URL https://app-install-hub-1.preview.emergentagent.com/api/* returns 404 for all API endpoints. This requires configuring the Kubernetes ingress/proxy to properly route /api/* requests to the backend service on port 8001. Without this fix, no user functionality works including student login, parent registration, marker access, or admin features. The application architecture is solid but the deployment routing is broken.",
+  "action_item_for_main_agent": "CRITICAL PRIORITY: Fix external URL routing configuration. The backend application is fully functional on localhost:8001 but the external URL https://exam-platform-dev.preview.emergentagent.com/api/* returns 404 for all API endpoints. This requires configuring the Kubernetes ingress/proxy to properly route /api/* requests to the backend service on port 8001. Without this fix, no user functionality works including student login, parent registration, marker access, or admin features. The application architecture is solid but the deployment routing is broken.",
 
   "should_call_test_agent_after_fix": "true",
   "should_main_agent_test_itself": "false"

@@ -85,7 +85,7 @@ Comprehensive performance tracking across:
 ## 🚀 QUICK START FOR ACADEMIC BOARD
 
 ### **Test the Live System:**
-**URL:** https://app-install-hub-1.preview.emergentagent.com
+**URL:** https://exam-platform-dev.preview.emergentagent.com
 
 ### **Test Credentials:**
 
@@ -226,7 +226,7 @@ Users can switch language using the dropdown in top-right corner.
 - `GET /api/settings/branding` - Get branding
 - `POST /api/settings/branding` - Update branding
 
-**Full API Docs:** https://app-install-hub-1.preview.emergentagent.com/api/docs
+**Full API Docs:** https://exam-platform-dev.preview.emergentagent.com/api/docs
 
 ---
 

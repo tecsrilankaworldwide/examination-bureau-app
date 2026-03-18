@@ -7,7 +7,7 @@ import requests
 import os
 import tempfile
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://grade5-scholar.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://exam-platform-dev.preview.emergentagent.com')
 
 # Test credentials
 TEST_TEACHER_EMAIL = "testteacher123@test.com"

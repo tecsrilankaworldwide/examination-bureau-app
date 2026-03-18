@@ -173,6 +173,7 @@ class ExamCreate(BaseModel):
     grade: str
     month: str
     mcq_questions: List[Dict] = []
+    paper1_questions: List[Dict] = []  # Alias for mcq_questions from frontend
     written_essay_prompt: str = ""
     written_short_questions: List[str] = []
     mcq_duration_minutes: int = 60
@@ -189,6 +190,23 @@ class WrittenSubmission(BaseModel):
 class ParentPhotoUpload(BaseModel):
     attempt_id: str
     photo_urls: List[str]
+
+class BatchCreate(BaseModel):
+    name: str
+    grade: str
+    description: str = ""
+    language: str = "si"
+
+class BatchStudentAdd(BaseModel):
+    student_ids: List[str]
+
+class TeachingSessionCreate(BaseModel):
+    exam_id: str
+    language: str
+    title: str = ""
+    description: str = ""
+    price_lkr: float = 500.0
+    available_after_days: int = 7
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -399,12 +417,15 @@ async def create_exam(exam_data: ExamCreate, current_user: dict = Depends(get_cu
     
     grade_config = GRADE_WRITTEN_CONFIG.get(exam_data.grade, GRADE_WRITTEN_CONFIG["grade_5"])
     
+    # Accept questions from either field name
+    questions = exam_data.mcq_questions if exam_data.mcq_questions else exam_data.paper1_questions
+    
     exam = {
         "id": str(uuid.uuid4()),
         "title": exam_data.title,
         "grade": exam_data.grade,
         "month": exam_data.month,
-        "mcq_questions": exam_data.mcq_questions,
+        "mcq_questions": questions,
         "mcq_total_questions": MCQ_CONFIG["questions"],
         "mcq_duration_minutes": exam_data.mcq_duration_minutes or MCQ_CONFIG["duration_minutes"],
         "written_essay_prompt": exam_data.written_essay_prompt,
@@ -937,6 +958,9 @@ async def get_admin_statistics(current_user: dict = Depends(get_current_user)):
     total_attempts = await db.attempts.count_documents({})
     pending_marking = await db.attempts.count_documents({"status": AttemptStatus.PENDING_MARKING.value})
     completed = await db.attempts.count_documents({"status": AttemptStatus.COMPLETED.value})
+    total_batches = await db.batches.count_documents({"is_active": True})
+    total_teaching_sessions = await db.teaching_sessions.count_documents({"is_active": True})
+    pending_teaching_payments = await db.teaching_purchases.count_documents({"status": "pending_verification"})
     
     return {
         "total_students": total_students,
@@ -945,7 +969,10 @@ async def get_admin_statistics(current_user: dict = Depends(get_current_user)):
         "total_exams": total_exams,
         "total_attempts": total_attempts,
         "pending_marking": pending_marking,
-        "completed_exams": completed
+        "completed_exams": completed,
+        "total_batches": total_batches,
+        "total_teaching_sessions": total_teaching_sessions,
+        "pending_teaching_payments": pending_teaching_payments
     }
 
 @app.get("/api/admin/users")
@@ -960,6 +987,279 @@ async def list_users(role: Optional[str] = None, current_user: dict = Depends(ge
     
     users = await db.users.find(query, {"_id": 0, "hashed_password": 0}).to_list(1000)
     return {"users": users}
+
+# ============================================================================
+# BATCH / CLASS MANAGEMENT
+# ============================================================================
+
+@app.post("/api/batches/create")
+async def create_batch(batch_data: BatchCreate, current_user: dict = Depends(get_current_user)):
+    """Create a student batch/class"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    batch = {
+        "id": str(uuid.uuid4()),
+        "name": batch_data.name,
+        "grade": batch_data.grade,
+        "description": batch_data.description,
+        "language": batch_data.language,
+        "student_ids": [],
+        "created_by": current_user["id"],
+        "created_at": datetime.now(timezone.utc),
+        "is_active": True
+    }
+    
+    await db.batches.insert_one(batch)
+    batch.pop("_id", None)
+    return batch
+
+@app.get("/api/batches")
+async def list_batches(grade: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """List all batches"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    query = {"is_active": True}
+    if grade:
+        query["grade"] = grade
+    
+    batches = await db.batches.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Add student count for each batch
+    for batch in batches:
+        batch["student_count"] = len(batch.get("student_ids", []))
+    
+    return {"batches": batches}
+
+@app.post("/api/batches/{batch_id}/students")
+async def add_students_to_batch(batch_id: str, data: BatchStudentAdd, current_user: dict = Depends(get_current_user)):
+    """Add students to a batch"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    result = await db.batches.update_one(
+        {"id": batch_id},
+        {"$addToSet": {"student_ids": {"$each": data.student_ids}}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    return {"message": f"Added {len(data.student_ids)} students to batch"}
+
+@app.delete("/api/batches/{batch_id}/students/{student_id}")
+async def remove_student_from_batch(batch_id: str, student_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove a student from a batch"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    await db.batches.update_one(
+        {"id": batch_id},
+        {"$pull": {"student_ids": student_id}}
+    )
+    
+    return {"message": "Student removed from batch"}
+
+@app.get("/api/batches/{batch_id}")
+async def get_batch_details(batch_id: str, current_user: dict = Depends(get_current_user)):
+    """Get batch details with student list"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    batch = await db.batches.find_one({"id": batch_id}, {"_id": 0})
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    # Get student details
+    students = []
+    for sid in batch.get("student_ids", []):
+        student = await db.users.find_one({"id": sid}, {"_id": 0, "hashed_password": 0})
+        if student:
+            students.append(student)
+    
+    batch["students"] = students
+    batch["student_count"] = len(students)
+    return batch
+
+@app.delete("/api/batches/{batch_id}")
+async def delete_batch(batch_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a batch"""
+    if current_user["role"] not in ["admin"]:
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    await db.batches.update_one({"id": batch_id}, {"$set": {"is_active": False}})
+    return {"message": "Batch deleted"}
+
+# ============================================================================
+# MCQ TEACHING / EXPLANATION FEATURE (Paid)
+# ============================================================================
+
+@app.post("/api/teaching/sessions/create")
+async def create_teaching_session(data: TeachingSessionCreate, current_user: dict = Depends(get_current_user)):
+    """Create a teaching session for MCQ explanations"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    exam = await db.exams.find_one({"id": data.exam_id}, {"_id": 0})
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    
+    session = {
+        "id": str(uuid.uuid4()),
+        "exam_id": data.exam_id,
+        "exam_title": exam.get("title", ""),
+        "language": data.language,
+        "title": data.title or f"MCQ Explanations - {exam.get('title', '')} ({data.language.upper()})",
+        "description": data.description,
+        "price_lkr": data.price_lkr,
+        "available_after_days": data.available_after_days,
+        "audio_url": None,
+        "total_duration_minutes": 120,
+        "total_questions": 60,
+        "status": "pending_upload",
+        "created_by": current_user["id"],
+        "created_at": datetime.now(timezone.utc),
+        "is_active": True
+    }
+    
+    await db.teaching_sessions.insert_one(session)
+    session.pop("_id", None)
+    return session
+
+@app.post("/api/teaching/sessions/{session_id}/upload-audio")
+async def upload_teaching_audio(
+    session_id: str,
+    audio: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload MP3 audio for teaching session"""
+    if current_user["role"] not in ["admin", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    session = await db.teaching_sessions.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Save audio file
+    audio_dir = os.path.join(os.path.dirname(__file__), 'uploads', 'teaching')
+    os.makedirs(audio_dir, exist_ok=True)
+    
+    ext = audio.filename.split(".")[-1] if "." in audio.filename else "mp3"
+    filename = f"teaching_{session_id}.{ext}"
+    filepath = os.path.join(audio_dir, filename)
+    
+    with open(filepath, "wb") as f:
+        content = await audio.read()
+        f.write(content)
+    
+    audio_url = f"/uploads/teaching/{filename}"
+    
+    await db.teaching_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"audio_url": audio_url, "status": "active"}}
+    )
+    
+    return {"message": "Audio uploaded", "audio_url": audio_url}
+
+@app.get("/api/teaching/sessions")
+async def list_teaching_sessions(exam_id: Optional[str] = None, language: Optional[str] = None):
+    """List teaching sessions"""
+    query = {"is_active": True}
+    if exam_id:
+        query["exam_id"] = exam_id
+    if language:
+        query["language"] = language
+    
+    sessions = await db.teaching_sessions.find(query, {"_id": 0}).sort("created_at", -1).to_list(50)
+    return {"sessions": sessions}
+
+@app.post("/api/teaching/purchase")
+async def purchase_teaching_session(
+    data: Dict[str, str],
+    current_user: dict = Depends(get_current_user)
+):
+    """Student/Parent purchases access to teaching session"""
+    session_id = data.get("session_id")
+    
+    session = await db.teaching_sessions.find_one({"id": session_id, "is_active": True}, {"_id": 0})
+    if not session:
+        raise HTTPException(status_code=404, detail="Teaching session not found")
+    
+    # Check if already purchased
+    existing = await db.teaching_purchases.find_one({
+        "user_id": current_user["id"],
+        "session_id": session_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Already purchased")
+    
+    purchase = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["id"],
+        "session_id": session_id,
+        "exam_id": session.get("exam_id"),
+        "amount_lkr": session.get("price_lkr", 500),
+        "payment_method": data.get("payment_method", "bank_transfer"),
+        "payment_reference": data.get("payment_reference", ""),
+        "bank_name": data.get("bank_name", ""),
+        "status": "pending_verification",
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    await db.teaching_purchases.insert_one(purchase)
+    purchase.pop("_id", None)
+    return purchase
+
+@app.get("/api/teaching/my-sessions")
+async def get_my_teaching_sessions(current_user: dict = Depends(get_current_user)):
+    """Get teaching sessions purchased by current user"""
+    purchases = await db.teaching_purchases.find(
+        {"user_id": current_user["id"], "status": "verified"},
+        {"_id": 0}
+    ).to_list(50)
+    
+    session_ids = [p["session_id"] for p in purchases]
+    sessions = await db.teaching_sessions.find(
+        {"id": {"$in": session_ids}, "is_active": True},
+        {"_id": 0}
+    ).to_list(50)
+    
+    return {"sessions": sessions, "purchases": purchases}
+
+@app.put("/api/teaching/purchases/{purchase_id}/verify")
+async def verify_teaching_purchase(purchase_id: str, current_user: dict = Depends(get_current_user)):
+    """Admin verifies a teaching session purchase"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    result = await db.teaching_purchases.update_one(
+        {"id": purchase_id},
+        {"$set": {"status": "verified", "verified_at": datetime.now(timezone.utc), "verified_by": current_user["id"]}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Purchase not found")
+    
+    return {"message": "Purchase verified"}
+
+@app.get("/api/teaching/purchases/pending")
+async def get_pending_teaching_purchases(current_user: dict = Depends(get_current_user)):
+    """Admin gets pending teaching purchases for verification"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    purchases = await db.teaching_purchases.find(
+        {"status": "pending_verification"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Add user details
+    for purchase in purchases:
+        user = await db.users.find_one({"id": purchase["user_id"]}, {"_id": 0, "hashed_password": 0})
+        purchase["user"] = user
+    
+    return {"purchases": purchases}
 
 # ============================================================================
 # API ROOT
@@ -995,6 +1295,9 @@ async def startup_event():
         await db.attempts.create_index("secret_code", unique=True)
         await db.attempts.create_index("status")
         await db.marker_payments.create_index("marker_id")
+        await db.batches.create_index([("grade", 1), ("is_active", 1)])
+        await db.teaching_sessions.create_index([("exam_id", 1), ("language", 1)])
+        await db.teaching_purchases.create_index([("user_id", 1), ("session_id", 1)])
         logger.info("Database indexes created")
         
         # Seed sample admin

@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const AcademicLogo = ({ size = 'large' }) => {
+  const { t } = useTranslation();
   const dimensions = {
     small: { logoSize: 70, titleSize: 'text-2xl', subtitleSize: 'text-sm', squareSize: 4, gridSize: 11 },
     medium: { logoSize: 100, titleSize: 'text-4xl', subtitleSize: 'text-base', squareSize: 6, gridSize: 11 },
@@ -93,7 +95,7 @@ const AcademicLogo = ({ size = 'large' }) => {
             letterSpacing: '0.05em'
           }}
         >
-          Education Reforms Bureau
+          {t('app.title')}
         </h1>
         
         {/* Divider line */}
@@ -104,12 +106,12 @@ const AcademicLogo = ({ size = 'large' }) => {
           className={`${subtitleSize} font-semibold text-[#78350F] mb-2`}
           style={{ fontFamily: 'Figtree, sans-serif' }}
         >
-          Building Future Scholars
+          {t('app.tagline')}
         </p>
         
         {/* Est. year */}
         <p className="text-sm md:text-base text-[#6B7280] font-medium">
-          Excellence in Education Since 1982
+          {t('app.since')}
         </p>
       </div>
     </div>

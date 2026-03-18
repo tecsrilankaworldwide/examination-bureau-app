@@ -132,7 +132,7 @@ While you were at dinner, I've successfully implemented ALL 5 features you reque
 ✅ **Mobile:** Fully responsive  
 ✅ **Languages:** Sinhala (default), Tamil, English  
 
-**Live URL:** https://app-install-hub-1.preview.emergentagent.com
+**Live URL:** https://exam-platform-dev.preview.emergentagent.com
 
 ---
 
@@ -207,7 +207,7 @@ GET /api/settings/branding
 POST /api/settings/branding
 ```
 
-**Full API Docs:** https://app-install-hub-1.preview.emergentagent.com/api/docs
+**Full API Docs:** https://exam-platform-dev.preview.emergentagent.com/api/docs
 
 ---
 
@@ -240,7 +240,7 @@ https://github.com/tecsrilankaworldwide/grade5-scholarship-exam
 **When you return from dinner:**
 
 1. ✅ **Review the system:**
-   - Visit: https://app-install-hub-1.preview.emergentagent.com
+   - Visit: https://exam-platform-dev.preview.emergentagent.com
    - Test with credentials above
    - Try all new features
 

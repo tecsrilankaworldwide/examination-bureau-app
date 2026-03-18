@@ -38,7 +38,7 @@ const TeacherDashboard = () => {
     }
     
     // Validate exam has questions
-    const questionCount = examToPublish.paper1_questions?.length || 0;
+    const questionCount = examToPublish.mcq_questions?.length || 0;
     if (questionCount === 0) {
       alert('Cannot publish exam with 0 questions. Please add questions first.');
       return;
@@ -206,7 +206,7 @@ const TeacherDashboard = () => {
                         Grade: {exam.grade.replace('_', ' ').toUpperCase()} | {t('exam.month')}: {exam.month}
                       </p>
                       <p className="text-sm text-[#6B7280]">
-                        {t('exam.questions')}: {exam.paper1_questions?.length || 0} / 60
+                        {t('exam.questions')}: {exam.mcq_questions?.length || 0} / 60
                       </p>
                       <div className="mt-2">
                         {exam.status === 'published' ? (

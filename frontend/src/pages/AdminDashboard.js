@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth, API } from '../AuthContext';
 import axios from 'axios';
-import { Users, UserPlus, LogOut, Search, X, BookOpen, Layers, BarChart3, GraduationCap, Music, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, LogOut, Search, X, BookOpen, Layers, BarChart3, GraduationCap, Music, CheckCircle, Clock, AlertCircle, Download } from 'lucide-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const AdminDashboard = () => {
@@ -176,6 +176,9 @@ const AdminDashboard = () => {
                     <button onClick={() => setActiveTab('users')} className="p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors text-center">
                       <Users className="w-6 h-6 text-amber-600 mx-auto mb-2" /><span className="text-sm font-semibold text-amber-700">Manage Users</span>
                     </button>
+                    <a href={`${API.replace('/api','')}/admin-dl/Grade5-Exam-Portable-v2.1.0.zip`} download className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-center block" data-testid="download-desktop-app">
+                      <Download className="w-6 h-6 text-green-600 mx-auto mb-2" /><span className="text-sm font-semibold text-green-700">Desktop App (.exe)</span>
+                    </a>
                   </div>
                 </div>
               </div>

@@ -57,6 +57,16 @@ security = HTTPBearer()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def ensure_utc(dt):
+    """Ensure datetime is timezone-aware UTC (MongoDB stores naive datetimes)"""
+    if dt is None:
+        return None
+    if isinstance(dt, str):
+        dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
 # Upload directory for paper photos
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), 'uploads', 'papers')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -379,11 +389,7 @@ async def login(login_data: UserLogin):
             # Add upload status to response
             if active_attempt:
                 now = datetime.now(timezone.utc)
-                window_end = active_attempt.get("parent_upload_window_end")
-                if isinstance(window_end, str):
-                    window_end = datetime.fromisoformat(window_end.replace('Z', '+00:00'))
-                elif window_end and window_end.tzinfo is None:
-                    window_end = window_end.replace(tzinfo=timezone.utc)
+                window_end = ensure_utc(active_attempt.get("parent_upload_window_end"))
                 
                 if window_end and now > window_end:
                     # Window expired
@@ -556,9 +562,7 @@ async def save_mcq_answer(attempt_id: str, answer: MCQAnswer, current_user: dict
         raise HTTPException(status_code=400, detail="MCQ section not active")
     
     # Check time limit
-    mcq_started = attempt["mcq_started_at"]
-    if isinstance(mcq_started, str):
-        mcq_started = datetime.fromisoformat(mcq_started.replace('Z', '+00:00'))
+    mcq_started = ensure_utc(attempt["mcq_started_at"])
     
     exam = await db.exams.find_one({"id": attempt["exam_id"]})
     time_limit = exam.get("mcq_duration_minutes", 60)
@@ -685,15 +689,10 @@ async def get_parent_upload_status(student_id: str, current_user: dict = Depends
         return {"upload_available": False, "message": "No pending upload"}
     
     now = datetime.now(timezone.utc)
-    window_start = attempt.get("parent_upload_window_start")
-    window_end = attempt.get("parent_upload_window_end")
+    window_start = ensure_utc(attempt.get("parent_upload_window_start"))
+    window_end = ensure_utc(attempt.get("parent_upload_window_end"))
     
-    if isinstance(window_start, str):
-        window_start = datetime.fromisoformat(window_start.replace('Z', '+00:00'))
-    if isinstance(window_end, str):
-        window_end = datetime.fromisoformat(window_end.replace('Z', '+00:00'))
-    
-    if now < window_start:
+    if window_start and now < window_start:
         return {
             "upload_available": False,
             "message": "Upload window not yet open",
@@ -737,11 +736,9 @@ async def upload_paper_photos(
     
     # Verify upload window
     now = datetime.now(timezone.utc)
-    window_end = attempt.get("parent_upload_window_end")
-    if isinstance(window_end, str):
-        window_end = datetime.fromisoformat(window_end.replace('Z', '+00:00'))
+    window_end = ensure_utc(attempt.get("parent_upload_window_end"))
     
-    if now > window_end:
+    if window_end and now > window_end:
         await db.attempts.update_one(
             {"id": attempt_id},
             {"$set": {"status": AttemptStatus.PENDING_MARKING.value}}

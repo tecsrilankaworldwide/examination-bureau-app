@@ -1,4 +1,4 @@
-# Grade 5 Scholarship Examination Platform - PRD v3.0
+# Grade 5 Scholarship Examination Platform - PRD v4.0
 
 ## Original Problem Statement
 Complete exam system for Grade 2-5 scholarship preparation with strict flow control:
@@ -6,63 +6,49 @@ Complete exam system for Grade 2-5 scholarship preparation with strict flow cont
 - Parent CANNOT login while student is taking exam  
 - Parent has 5 minutes to upload photos AFTER student finishes
 - Anonymous marking with secret codes
-- Marker payment tracking
+- Marker payment tracking with direct bank transfers to Sri Lankan banks
 - Multi-language support (Sinhala, Tamil, English)
 - Batch/Class management for island-wide operation
 - MCQ Teaching feature with paid audio explanations
 - Desktop app (.exe) for network-based island-wide use
+- Bulk CSV student import for marketing teams
 
-## User Flow (VERIFIED WORKING)
+## What's Been Implemented
 
-### Student Flow:
-1. Student logs in with email/password
-2. Sees available exams for their grade
-3. Starts exam → MCQ Section (60 questions, 60 min timer)
-4. Auto-save answers as they go
-5. Submit MCQ → Auto-graded by system
-6. Written Section (Essay + 5-15 short questions)
-7. Submit Written → Exam ends
-8. **Must logout for parent to login**
+### Phase 1 - Bug Fixes & Branding (Completed 2026-03-18)
+- [x] AcademicLogo.js uses i18next translations
+- [x] Sinhala title: "විභාග ඇගැයුම් කාර්යාංශය"
+- [x] Login page generic for all roles
+- [x] All 5 role logins verified
 
-### Parent Flow:
-1. **CANNOT login** while student is taking exam (blocked by system)
-2. **CAN login** only AFTER student finishes written section
-3. Has exactly **5 minutes** to upload photos of written paper
-4. Upload window closes automatically after 5 minutes
-5. Papers go to marking queue with SECRET CODE only
+### Phase 2 - Core Features (Completed 2026-03-18)
+- [x] Fixed ExamCreator field name bug
+- [x] Batch/Class Management with teacher_incharge
+- [x] MCQ Teaching Session provisions
+- [x] Admin Dashboard with Overview, Users, Batches, Teaching tabs
 
-### Marker Flow:
-1. Sees papers with **SECRET CODE ONLY** (no student name)
-2. Claims paper → Marks → Submits
-3. Payment recorded per paper marked
+### Phase 3 - Desktop App (Completed 2026-03-18)
+- [x] Electron desktop app (.exe) - network-based
+- [x] Download: https://grade5exam.com/admin-dl/Grade5-Exam-Portable-v2.1.0.zip
+- [x] Admin-only download button
 
-### MCQ Teaching Flow (NEW):
-1. Admin/Teacher creates teaching session linked to an exam
-2. Uploads MP3 audio (60 questions x 2 min = ~2 hours)
-3. 4 exams/month x 3 languages = 12 recordings/month
-4. Available to students 7 days after their exam
-5. Students pay separately (bank transfer) for access
-6. Admin verifies payment → grants access
+### Phase 4 - Payments & CSV Import (Completed 2026-03-20)
+- [x] Marker bank details (Sri Lankan banks dropdown)
+- [x] Admin marker payment management (view, pay, track)
+- [x] Admin Payments tab with grouped marker summaries
+- [x] Bulk CSV student import
+- [x] Auto-batch creation from school name in CSV
+- [x] Auto-generated passwords for imported students
+- [x] Admin Dashboard now has 5 tabs
+- [x] E2E exam flow tested and passing
 
-## Verified Test Results (2026-03-18)
-
-| Test | Result |
-|------|--------|
-| All 5 Role Logins | PASS |
-| Language Switching (EN/SI/TA) | PASS |
-| Academic Logo Translation | PASS |
-| Admin Dashboard (4 tabs) | PASS |
-| Admin Statistics API | PASS |
-| User Management | PASS |
-| Batch Management | PASS |
-| Teaching Sessions Tab | PASS |
-| Student Dashboard | PASS |
-| Teacher Dashboard | PASS |
-| Backend API 100% | PASS |
-| Frontend UI 100% | PASS |
+## Test Results Summary
+| Iteration | Date | Backend | Frontend |
+|-----------|------|---------|----------|
+| 4 | 2026-03-18 | 100% | 100% |
+| 5 | 2026-03-20 | 100% (15/15) | 100% |
 
 ## Test Accounts
-
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@exam.lk | admin123 |
@@ -71,104 +57,31 @@ Complete exam system for Grade 2-5 scholarship preparation with strict flow cont
 | Parent | parent@test.lk | pass123 |
 | Teacher | teacher@test.lk | pass123 |
 
-## Tech Stack
-- **Backend**: FastAPI (Python 3.11) + MongoDB Atlas
-- **Frontend**: React 18 + Tailwind CSS + i18next
-- **Database**: MongoDB Atlas (cluster0.0cisjyt.mongodb.net)
-- **DB Name**: exam_bureau_db
-
-## What's Been Implemented
-
-### Phase 1 - Bug Fixes & Branding (Completed 2026-03-18)
-- [x] Fixed AcademicLogo.js to use i18next translations
-- [x] Updated Sinhala title to "විභාග ඇගැයුම් කාර්යාංශය"
-- [x] Made Login page generic for all roles (not parent-specific)
-- [x] Translated all hardcoded text (registration link, email hints)
-- [x] Verified login works for all 5 roles
-- [x] Fixed admin dashboard to load users from API
-
-### Phase 2 - Core Features (Completed 2026-03-18)
-- [x] Fixed ExamCreator field name bug (paper1_questions → mcq_questions)
-- [x] Fixed TeacherDashboard question count display
-- [x] Added Batch/Class Management (CRUD endpoints + UI)
-- [x] Added MCQ Teaching Session provisions (backend models + API + admin UI)
-- [x] Added Teaching purchase/payment tracking (bank transfer)
-- [x] Enhanced Admin Dashboard with 4 tabs (Overview, Users, Batches, Teaching)
-- [x] Admin statistics now include batches and teaching data
-
 ## Remaining Tasks
-
-### P0 - Desktop App (.exe) — COMPLETED 2026-03-18
-- [x] Network-based Electron app connecting to grade5exam.com
-- [x] Auto-reconnect on network failure
-- [x] Loading screen with connection status
-- [x] App menu with refresh, zoom, fullscreen, about
-- [x] Single-instance lock (prevents multiple windows)
-- [x] Custom graduation cap icon
-- [x] Portable .exe built (103MB zip)
-- [x] Download available at: https://grade5exam.com/downloads/Grade5-Exam-Portable-v2.1.0.zip
-
-### P1 - End-to-End Exam Flow Testing
-- [ ] Full walkthrough on live system
-- [ ] Student takes exam → Parent uploads → Teacher marks
 
 ### P1 - MCQ Teaching Feature (Full Implementation)
 - [ ] Audio upload UI for admin/teachers
-- [ ] Student teaching session access after exam + payment
-- [ ] Payment verification workflow (admin verifies bank transfers)
-- [ ] Audio player in student dashboard
-
-### P2 - Teacher Payments
-- [ ] Direct bank transfer to teachers' various bank accounts
-- [ ] Payment tracking and reporting
+- [ ] Student dashboard audio player
+- [ ] Payment verification workflow
+- [ ] Student access after exam + 7 day wait
 
 ### P2 - Marketing Provisions
-- [ ] Marketing canvas support for classes
-- [ ] Not immediate but provisions in place
+- [ ] Marketing canvas support pages
 
-## API Endpoints
+### P2 - Deployment
+- [ ] Push latest code to GitHub (token expired)
+- [ ] Deploy Phase 4 changes to grade5exam.com (DONE for backend, frontend needs rebuild)
 
-### Auth
-- `POST /api/login` - Login (blocks parent during student exam)
-- `POST /api/register` - Register user (admin)
-- `POST /api/register-student-parent` - Combined registration
+## CSV Import Format
+```
+student_name,student_email,parent_name,parent_email,grade,language,school,teacher_incharge
+Kasun Perera,kasun@test.lk,Nimal Perera,nimal@test.lk,5,si,Royal College,Mrs. Silva
+```
 
-### Exam Flow
-- `POST /api/exams/create` - Create exam
-- `GET /api/exams` - List exams
-- `PUT /api/exams/{id}/publish` - Publish exam
-- `POST /api/exams/{id}/start` - Start exam
-- `POST /api/attempts/{id}/save-mcq` - Auto-save answer
-- `POST /api/attempts/{id}/submit-mcq` - Submit MCQ section
-- `POST /api/attempts/{id}/submit-written` - Submit written
-
-### Parent
-- `GET /api/parent/upload-status/{id}` - Check upload window
-- `POST /api/parent/upload-photos` - Upload paper photos
-
-### Marker
-- `GET /api/marker/pending-papers` - Get anonymous papers
-- `POST /api/marker/claim-paper/{id}` - Claim paper
-- `POST /api/marker/submit-marks/{id}` - Submit marks
-- `GET /api/marker/my-payments` - Payment history
-
-### Batches (NEW)
-- `POST /api/batches/create` - Create batch
-- `GET /api/batches` - List batches
-- `GET /api/batches/{id}` - Get batch details
-- `POST /api/batches/{id}/students` - Add students
-- `DELETE /api/batches/{id}/students/{sid}` - Remove student
-- `DELETE /api/batches/{id}` - Delete batch
-
-### Teaching Sessions (NEW)
-- `POST /api/teaching/sessions/create` - Create session
-- `GET /api/teaching/sessions` - List sessions
-- `POST /api/teaching/sessions/{id}/upload-audio` - Upload MP3
-- `POST /api/teaching/purchase` - Purchase session
-- `GET /api/teaching/my-sessions` - My purchased sessions
-- `PUT /api/teaching/purchases/{id}/verify` - Admin verify payment
-- `GET /api/teaching/purchases/pending` - Pending payments
-
-### Admin
-- `GET /api/admin/statistics` - Dashboard stats
-- `GET /api/admin/users` - List all users
+## Key API Endpoints (New)
+- `POST /api/admin/import-students-csv` - Bulk CSV import
+- `PUT /api/marker/bank-details` - Save bank details
+- `GET /api/marker/bank-details` - Get bank details
+- `GET /api/admin/marker-payments` - View all marker payments grouped
+- `POST /api/admin/pay-marker/{marker_id}` - Process payment
+- `GET /api/admin/export-credentials` - Export student credentials

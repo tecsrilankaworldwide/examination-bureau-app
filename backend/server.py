@@ -25,6 +25,8 @@ import string
 import base64
 from cachetools import TTLCache
 import shutil
+import csv
+import io
 
 # Load environment variables
 load_dotenv()
@@ -206,6 +208,7 @@ class BatchCreate(BaseModel):
     grade: str
     description: str = ""
     language: str = "si"
+    teacher_incharge: str = ""
 
 class BatchStudentAdd(BaseModel):
     student_ids: List[str]
@@ -217,6 +220,16 @@ class TeachingSessionCreate(BaseModel):
     description: str = ""
     price_lkr: float = 500.0
     available_after_days: int = 7
+
+class MarkerBankDetails(BaseModel):
+    bank_name: str
+    branch: str
+    account_number: str
+    account_holder_name: str
+
+class MarkerPaymentProcess(BaseModel):
+    payment_ids: List[str]
+    reference_number: str = ""
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -902,6 +915,262 @@ async def get_marker_payments(current_user: dict = Depends(get_current_user)):
         "papers_marked": len(payments)
     }
 
+@app.put("/api/marker/bank-details")
+async def update_marker_bank_details(details: MarkerBankDetails, current_user: dict = Depends(get_current_user)):
+    """Marker updates their bank details"""
+    if current_user["role"] not in ["marker", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "bank_details": {
+                "bank_name": details.bank_name,
+                "branch": details.branch,
+                "account_number": details.account_number,
+                "account_holder_name": details.account_holder_name,
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }}
+    )
+    
+    return {"message": "Bank details updated"}
+
+@app.get("/api/marker/bank-details")
+async def get_marker_bank_details(current_user: dict = Depends(get_current_user)):
+    """Marker gets their bank details"""
+    if current_user["role"] not in ["marker", "teacher"]:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0, "bank_details": 1})
+    return {"bank_details": user.get("bank_details", None)}
+
+@app.get("/api/admin/marker-payments")
+async def admin_get_all_marker_payments(status_filter: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Admin views all marker payments"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    query = {}
+    if status_filter:
+        query["status"] = status_filter
+    
+    payments = await db.marker_payments.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    
+    # Group by marker
+    marker_summary = {}
+    for p in payments:
+        mid = p["marker_id"]
+        if mid not in marker_summary:
+            marker = await db.users.find_one({"id": mid}, {"_id": 0, "hashed_password": 0})
+            marker_summary[mid] = {
+                "marker_id": mid,
+                "marker_name": marker.get("full_name", "Unknown") if marker else "Unknown",
+                "bank_details": marker.get("bank_details") if marker else None,
+                "total_papers": 0,
+                "total_pending": 0,
+                "total_paid": 0,
+                "payments": []
+            }
+        marker_summary[mid]["total_papers"] += 1
+        if p["status"] == "pending":
+            marker_summary[mid]["total_pending"] += p["amount"]
+        else:
+            marker_summary[mid]["total_paid"] += p["amount"]
+        marker_summary[mid]["payments"].append(p)
+    
+    return {"markers": list(marker_summary.values()), "total_payments": len(payments)}
+
+@app.post("/api/admin/process-marker-payments")
+async def process_marker_payments(data: MarkerPaymentProcess, current_user: dict = Depends(get_current_user)):
+    """Admin marks payments as paid (after bank transfer)"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    result = await db.marker_payments.update_many(
+        {"id": {"$in": data.payment_ids}, "status": "pending"},
+        {"$set": {
+            "status": "paid",
+            "paid_at": datetime.now(timezone.utc),
+            "paid_by": current_user["id"],
+            "reference_number": data.reference_number
+        }}
+    )
+    
+    return {"message": f"{result.modified_count} payments marked as paid"}
+
+@app.post("/api/admin/pay-marker/{marker_id}")
+async def pay_all_marker_pending(marker_id: str, data: Dict[str, str], current_user: dict = Depends(get_current_user)):
+    """Admin pays all pending payments for a marker"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    result = await db.marker_payments.update_many(
+        {"marker_id": marker_id, "status": "pending"},
+        {"$set": {
+            "status": "paid",
+            "paid_at": datetime.now(timezone.utc),
+            "paid_by": current_user["id"],
+            "reference_number": data.get("reference_number", "")
+        }}
+    )
+    
+    return {"message": f"{result.modified_count} payments processed for marker"}
+
+# ============================================================================
+# BULK CSV STUDENT IMPORT
+# ============================================================================
+
+@app.post("/api/admin/import-students-csv")
+async def import_students_csv(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Admin bulk imports students from CSV file"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    content = await file.read()
+    text = content.decode('utf-8-sig')
+    reader = csv.DictReader(io.StringIO(text))
+    
+    results = {"created": 0, "skipped": 0, "errors": [], "details": []}
+    
+    for i, row in enumerate(reader, 1):
+        try:
+            student_name = row.get('student_name', '').strip()
+            student_email = row.get('student_email', '').strip()
+            parent_name = row.get('parent_name', '').strip()
+            parent_email = row.get('parent_email', '').strip()
+            grade = row.get('grade', 'grade_5').strip()
+            language = row.get('language', 'si').strip()
+            school = row.get('school', '').strip()
+            teacher_incharge = row.get('teacher_incharge', '').strip()
+            
+            if not student_name or not student_email:
+                results["errors"].append(f"Row {i}: Missing student name or email")
+                results["skipped"] += 1
+                continue
+            
+            # Check if student already exists
+            existing = await db.users.find_one({"email": student_email})
+            if existing:
+                results["errors"].append(f"Row {i}: {student_email} already exists")
+                results["skipped"] += 1
+                continue
+            
+            # Normalize grade format
+            if not grade.startswith('grade_'):
+                grade = f"grade_{grade}"
+            
+            # Generate default password
+            default_password = f"exam{random.randint(1000, 9999)}"
+            
+            # Create student
+            student_id = generate_student_id()
+            student_user = {
+                "id": str(uuid.uuid4()),
+                "student_id": student_id,
+                "email": student_email,
+                "hashed_password": get_password_hash(default_password),
+                "full_name": student_name,
+                "role": "student",
+                "grade": grade,
+                "language": language,
+                "school": school,
+                "teacher_incharge": teacher_incharge,
+                "created_at": datetime.now(timezone.utc),
+                "is_active": True
+            }
+            await db.users.insert_one(student_user)
+            
+            detail = {
+                "row": i,
+                "student_name": student_name,
+                "student_email": student_email,
+                "student_password": default_password,
+                "student_id": student_id
+            }
+            
+            # Create parent if email provided
+            if parent_email:
+                existing_parent = await db.users.find_one({"email": parent_email})
+                if existing_parent:
+                    # Link existing parent to this student
+                    await db.users.update_one(
+                        {"email": parent_email},
+                        {"$set": {"linked_student_user_id": student_user["id"]}}
+                    )
+                    detail["parent_status"] = "linked_existing"
+                else:
+                    parent_password = f"parent{random.randint(1000, 9999)}"
+                    parent_user = {
+                        "id": str(uuid.uuid4()),
+                        "email": parent_email,
+                        "hashed_password": get_password_hash(parent_password),
+                        "full_name": parent_name or f"Parent of {student_name}",
+                        "role": "parent",
+                        "grade": grade,
+                        "language": language,
+                        "linked_student_user_id": student_user["id"],
+                        "school": school,
+                        "created_at": datetime.now(timezone.utc),
+                        "is_active": True
+                    }
+                    await db.users.insert_one(parent_user)
+                    detail["parent_email"] = parent_email
+                    detail["parent_password"] = parent_password
+                    detail["parent_status"] = "created"
+            
+            # Add to batch if school provided
+            if school:
+                batch = await db.batches.find_one({"name": school, "grade": grade, "is_active": True})
+                if not batch:
+                    batch = {
+                        "id": str(uuid.uuid4()),
+                        "name": school,
+                        "grade": grade,
+                        "description": f"Auto-created from CSV import",
+                        "language": language,
+                        "student_ids": [],
+                        "teacher_incharge": teacher_incharge,
+                        "created_by": current_user["id"],
+                        "created_at": datetime.now(timezone.utc),
+                        "is_active": True
+                    }
+                    await db.batches.insert_one(batch)
+                
+                await db.batches.update_one(
+                    {"name": school, "grade": grade, "is_active": True},
+                    {"$addToSet": {"student_ids": student_user["id"]}}
+                )
+                detail["batch"] = school
+            
+            results["created"] += 1
+            results["details"].append(detail)
+            
+        except Exception as e:
+            results["errors"].append(f"Row {i}: {str(e)}")
+            results["skipped"] += 1
+    
+    return results
+
+@app.get("/api/admin/export-credentials")
+async def export_student_credentials(batch_name: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Admin exports student credentials (for distribution)"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    query = {"role": "student", "is_active": True}
+    if batch_name:
+        batch = await db.batches.find_one({"name": batch_name, "is_active": True})
+        if batch:
+            query["id"] = {"$in": batch.get("student_ids", [])}
+    
+    students = await db.users.find(query, {"_id": 0, "hashed_password": 0}).to_list(1000)
+    
+    return {"students": students, "count": len(students)}
+
 # ============================================================================
 # RESULTS & PROGRESS (No student identity revealed to markers)
 # ============================================================================
@@ -1001,6 +1270,7 @@ async def create_batch(batch_data: BatchCreate, current_user: dict = Depends(get
         "grade": batch_data.grade,
         "description": batch_data.description,
         "language": batch_data.language,
+        "teacher_incharge": batch_data.teacher_incharge,
         "student_ids": [],
         "created_by": current_user["id"],
         "created_at": datetime.now(timezone.utc),

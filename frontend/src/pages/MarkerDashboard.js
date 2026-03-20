@@ -24,6 +24,11 @@ const MarkerDashboard = () => {
     short_answer_marks: [],
     comments: ''
   });
+  
+  // Bank details
+  const [bankDetails, setBankDetails] = useState(null);
+  const [showBankForm, setShowBankForm] = useState(false);
+  const [bankForm, setBankForm] = useState({ bank_name: '', branch: '', account_number: '', account_holder_name: '' });
 
   // Fetch pending papers
   const fetchPendingPapers = async () => {
@@ -54,7 +59,27 @@ const MarkerDashboard = () => {
   useEffect(() => {
     fetchPendingPapers();
     fetchPayments();
+    fetchBankDetails();
   }, [token]);
+
+  const fetchBankDetails = async () => {
+    try {
+      const res = await axios.get(`${API}/marker/bank-details`, { headers: { Authorization: `Bearer ${token}` } });
+      setBankDetails(res.data.bank_details);
+      if (res.data.bank_details) {
+        setBankForm(res.data.bank_details);
+      }
+    } catch (err) { console.error('Failed to fetch bank details'); }
+  };
+
+  const handleSaveBankDetails = async () => {
+    try {
+      await axios.put(`${API}/marker/bank-details`, bankForm, { headers: { Authorization: `Bearer ${token}` } });
+      setBankDetails(bankForm);
+      setShowBankForm(false);
+      alert('Bank details saved!');
+    } catch (err) { alert('Error: ' + (err.response?.data?.detail || err.message)); }
+  };
 
   // Claim paper for marking
   const handleClaimPaper = async (attemptId) => {
@@ -171,6 +196,17 @@ const MarkerDashboard = () => {
             }`}
           >
             My Payments
+          </button>
+          <button
+            onClick={() => setView('bank')}
+            data-testid="tab-bank"
+            className={`px-6 py-3 rounded-lg font-medium transition-all ${
+              view === 'bank' 
+                ? 'bg-blue-500 text-white shadow-lg' 
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Bank Details
           </button>
         </div>
 
@@ -356,6 +392,14 @@ const MarkerDashboard = () => {
         {/* Payments View */}
         {view === 'payments' && (
           <div className="space-y-6">
+            {/* Bank Details Notice */}
+            {!bankDetails && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+                <p className="text-amber-800 text-sm font-medium">Please add your bank details to receive payments</p>
+                <button onClick={() => setView('bank')} className="px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600">Add Bank Details</button>
+              </div>
+            )}
+            
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -399,6 +443,76 @@ const MarkerDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Bank Details View */}
+        {view === 'bank' && (
+          <div className="max-w-lg mx-auto">
+            <div className="bg-white rounded-xl p-6 shadow-lg">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Bank Account Details</h3>
+              <p className="text-sm text-gray-600 mb-6">Your bank details are used for receiving marking payments via direct bank transfer.</p>
+              
+              {bankDetails && !showBankForm ? (
+                <div className="space-y-4">
+                  <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div><span className="text-gray-500">Bank:</span><p className="font-semibold text-gray-800">{bankDetails.bank_name}</p></div>
+                      <div><span className="text-gray-500">Branch:</span><p className="font-semibold text-gray-800">{bankDetails.branch}</p></div>
+                      <div><span className="text-gray-500">Account No:</span><p className="font-semibold text-gray-800">{bankDetails.account_number}</p></div>
+                      <div><span className="text-gray-500">Account Holder:</span><p className="font-semibold text-gray-800">{bankDetails.account_holder_name}</p></div>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowBankForm(true)} className="w-full py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600" data-testid="edit-bank-btn">Edit Bank Details</button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name *</label>
+                    <select value={bankForm.bank_name} onChange={(e) => setBankForm({...bankForm, bank_name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" data-testid="bank-name-select">
+                      <option value="">Select Bank</option>
+                      <option value="Bank of Ceylon">Bank of Ceylon</option>
+                      <option value="People's Bank">People's Bank</option>
+                      <option value="Commercial Bank">Commercial Bank</option>
+                      <option value="Hatton National Bank">Hatton National Bank</option>
+                      <option value="Sampath Bank">Sampath Bank</option>
+                      <option value="NSB">National Savings Bank</option>
+                      <option value="Seylan Bank">Seylan Bank</option>
+                      <option value="DFCC Bank">DFCC Bank</option>
+                      <option value="NDB Bank">NDB Bank</option>
+                      <option value="Pan Asia Bank">Pan Asia Bank</option>
+                      <option value="Union Bank">Union Bank</option>
+                      <option value="Amana Bank">Amana Bank</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Branch *</label>
+                    <input type="text" value={bankForm.branch} onChange={(e) => setBankForm({...bankForm, branch: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., Colombo Fort" data-testid="bank-branch-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Account Number *</label>
+                    <input type="text" value={bankForm.account_number} onChange={(e) => setBankForm({...bankForm, account_number: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Enter account number" data-testid="bank-account-input" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder Name *</label>
+                    <input type="text" value={bankForm.account_holder_name} onChange={(e) => setBankForm({...bankForm, account_holder_name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Name as per bank records" data-testid="bank-holder-input" />
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    {bankDetails && <button type="button" onClick={() => setShowBankForm(false)} className="flex-1 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300">Cancel</button>}
+                    <button onClick={handleSaveBankDetails}
+                      disabled={!bankForm.bank_name || !bankForm.branch || !bankForm.account_number || !bankForm.account_holder_name}
+                      className="flex-1 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50" data-testid="save-bank-btn">
+                      Save Bank Details
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
